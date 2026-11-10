@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bean Buzz — Stall Tracker</title>
+<style>
+:root{
+  --cream:#F7F1E2; --paper:#FFFDF5; --card:#FFFFFF;
+  --green:#0C3B2E; --green2:#14532D; --green3:#1E6B45;
+  --gold:#C2A059; --gold2:#A8823D; --goldsoft:#EFE3C2;
+  --ink:#243528; --mut:#7C7666; --line:#E7DFC9;
+  --red:#B3402E; --redsoft:#F9E8E2;
+  --shadow:0 6px 22px rgba(12,59,46,.10);
+  --r:18px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--cream);color:var(--ink);padding-bottom:92px;font-size:15px}
+h1,h2,.serif{font-family:Georgia,"Times New Roman",serif}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
+::-webkit-scrollbar{width:0;height:0}
+
+/* ---------- header ---------- */
+.topbar{position:sticky;top:0;z-index:40;background:linear-gradient(180deg,#FBF7EA,#F7F1E2);padding:10px 16px 8px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.topbar img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);background:#fff}
+.topbar .t1{font-family:Georgia,serif;font-size:19px;letter-spacing:2.5px;color:var(--green);font-weight:700;line-height:1}
+.topbar .t2{font-size:9.5px;letter-spacing:2.6px;color:var(--gold2);font-weight:700;margin-top:3px}
+.topbar .today{margin-left:auto;text-align:right;font-size:11px;color:var(--mut);line-height:1.5}
+.topbar .today b{color:var(--green);font-size:12.5px}
+
+/* ---------- layout ---------- */
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 6px}
+.page{display:none}
+.page.active{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.card h3{font-size:13px;letter-spacing:1.6px;color:var(--green);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card h3 .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);display:inline-block}
+
+/* month switcher */
+.mswitch{display:flex;align-items:center;justify-content:space-between;background:var(--green);border-radius:14px;padding:9px 8px;margin-bottom:14px;box-shadow:var(--shadow)}
+.mswitch button{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.12);color:#F3E9CF;font-size:19px;line-height:1}
+.mswitch .mlab{text-align:center}
+.mswitch .mlab .m{font-family:Georgia,serif;font-size:18px;color:#FBF4DC;letter-spacing:1px}
+.mswitch .mlab .s{font-size:10px;color:#CDBB8A;letter-spacing:2px;margin-top:2px}
+
+/* hero */
+.hero{background:radial-gradient(120% 150% at 85% -20%,#1E6B45 0%,var(--green) 55%);border-radius:22px;padding:20px 18px 16px;color:#F5EDD6;box-shadow:0 12px 28px rgba(12,59,46,.28);margin-bottom:14px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-38px;top:-38px;width:150px;height:150px;border-radius:50%;border:22px solid rgba(194,160,89,.20)}
+.hero .brand{display:flex;align-items:center;gap:11px;position:relative;z-index:1}
+.hero .brand img{width:52px;height:52px;border-radius:50%;border:2px solid var(--gold);object-fit:cover;background:#fff}
+.hero .brand .b1{font-family:Georgia,serif;font-size:20px;letter-spacing:2px;font-weight:700}
+.hero .brand .b2{font-size:9px;letter-spacing:2.8px;color:#D9C48C;font-weight:700;margin-top:3px}
+.hero .plabel{margin-top:16px;font-size:10.5px;letter-spacing:2.2px;color:#CDBB8A;font-weight:700;position:relative;z-index:1}
+.hero .pbig{font-family:Georgia,serif;font-size:40px;font-weight:700;color:#FFF7DE;line-height:1.08;position:relative;z-index:1}
+.hero .psub{font-size:12px;color:#D8CBA3;position:relative;z-index:1;margin-top:2px}
+.hero .split{display:flex;gap:10px;margin-top:14px;position:relative;z-index:1}
+.hero .split .sp{flex:1;background:rgba(255,255,255,.09);border:1px solid rgba(194,160,89,.45);border-radius:14px;padding:10px 12px}
+.hero .split .sp .n{font-size:10px;letter-spacing:1.6px;color:#D9C48C;font-weight:700}
+.hero .split .sp .v{font-family:Georgia,serif;font-size:20px;color:#FFF3D0;margin-top:3px}
+
+/* stat grid */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:13px 14px}
+.stat .k{font-size:10.5px;letter-spacing:1.4px;color:var(--mut);font-weight:700;text-transform:uppercase}
+.stat .v{font-family:Georgia,serif;font-size:23px;color:var(--green);margin-top:4px}
+.stat .v small{font-size:12px;color:var(--mut);font-family:inherit}
+.stat.gold .v{color:var(--gold2)}
+.stat.red .v{color:var(--red)}
+
+/* rows / lists */
+.row{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px dashed var(--line)}
+.row:last-child{border-bottom:none}
+.row .ic{width:38px;height:38px;border-radius:12px;background:var(--goldsoft);display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
+.row .ic.g{background:#E2EEE4}.row .ic.r{background:var(--redsoft)}
+.row .mid{flex:1;min-width:0}
+.row .mid .a{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .mid .b{font-size:11.5px;color:var(--mut);margin-top:1px}
+.row .amt{font-weight:700;font-size:15px;color:var(--green);white-space:nowrap}
+.row .amt.neg{color:var(--red)}
+.row .del{color:#C9BFA4;font-size:17px;padding:4px 2px;flex:none}
+.tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.6px;padding:2.5px 7px;border-radius:20px;vertical-align:2px}
+.tag.stock{background:#E2EEE4;color:var(--green2)}
+.tag.fresh{background:#FDF0D5;color:#8A6414}
+.tag.op{background:#EAE7F5;color:#4B3F8F}
+.tag.waste{background:var(--redsoft);color:var(--red)}
+.tag.sale{background:var(--goldsoft);color:var(--gold2)}
+.empty{padding:20px 8px;text-align:center;color:var(--mut);font-size:13.5px}
+.alert{background:#FBF3D9;border:1px solid #E4CE8E;border-radius:14px;padding:11px 13px;font-size:13px;margin-bottom:9px;display:flex;gap:9px;align-items:center}
+.alert b{color:#7A5B10}
+.note{font-size:12px;color:var(--mut);line-height:1.55}
+.note b{color:var(--green)}
+
+/* forms */
+.fcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.fcard h3{font-size:13px;letter-spacing:1.6px;color:var(--green);text-transform:uppercase;margin-bottom:12px}
+.frow{margin-bottom:11px}
+.frow label{display:block;font-size:11px;font-weight:700;letter-spacing:1.1px;color:var(--mut);text-transform:uppercase;margin-bottom:5px}
+.frow input,.frow select,.frow textarea{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:#FFFEF9;outline:none}
+.frow input:focus,.frow select:focus,.frow textarea:focus{border-color:var(--gold)}
+.f2{display:flex;gap:10px}.f2 .frow{flex:1}
+.seg{display:flex;background:#F1EAD3;border-radius:12px;padding:4px;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+.seg button{flex:1;padding:9px 4px;border-radius:9px;font-size:12.5px;font-weight:700;color:var(--mut);white-space:nowrap}
+.seg button.on{background:var(--green);color:#F7EDCB;box-shadow:0 3px 8px rgba(12,59,46,.25)}
+.btn{display:block;width:100%;padding:14px;border-radius:14px;background:linear-gradient(180deg,var(--green2),var(--green));color:#F8F0D2;font-size:15.5px;font-weight:700;letter-spacing:.4px;box-shadow:0 8px 18px rgba(12,59,46,.25)}
+.btn:active{transform:scale(.985)}
+.btn.gold{background:linear-gradient(180deg,#D9B96A,var(--gold2));color:#2E2208}
+.btn.ghost{background:#fff;color:var(--green);border:1.5px solid var(--green);box-shadow:none}
+.btn.sm{padding:10px;font-size:13.5px}
+.autobox{background:#F4EEDA;border:1px dashed var(--gold);border-radius:12px;padding:10px 12px;font-size:13.5px;margin-bottom:11px;color:#6B5518}
+.autobox b{color:var(--green);font-size:16px}
+
+/* P&L table */
+.pl{display:flex;justify-content:space-between;padding:9px 2px;border-bottom:1px dashed var(--line);font-size:14.5px}
+.pl:last-child{border-bottom:none}
+.pl .v{font-weight:700;color:var(--green)}
+.pl.total{border-top:2px solid var(--gold);border-bottom:none;margin-top:4px;padding-top:12px;font-size:16px}
+.pl.total .v{color:var(--gold2);font-family:Georgia,serif;font-size:19px}
+.pl.sub .k{color:var(--mut);padding-left:14px;font-size:13.5px}
+.pl .v.neg{color:var(--red)}
+
+/* stock */
+.stockitem{padding:12px 2px;border-bottom:1px dashed var(--line)}
+.stockitem:last-child{border-bottom:none}
+.stockitem .l1{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.stockitem .nm{font-weight:600;font-size:14.5px}
+.stockitem .vl{font-weight:700;color:var(--green);white-space:nowrap}
+.stockitem .l2{display:flex;gap:12px;font-size:11.5px;color:var(--mut);margin-top:3px;flex-wrap:wrap}
+.lowb{background:var(--redsoft);color:var(--red);font-weight:700;padding:1px 7px;border-radius:12px;font-size:10px}
+.okb{background:#E2EEE4;color:var(--green2);font-weight:700;padding:1px 7px;border-radius:12px;font-size:10px}
+.progress{height:6px;background:#EFE8D2;border-radius:6px;margin-top:7px;overflow:hidden}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--green3));border-radius:6px}
+.closein{width:96px;padding:8px;border:1.5px solid var(--line);border-radius:10px;text-align:center;background:#FFFEF9}
+
+/* bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--green);box-shadow:0 -6px 20px rgba(12,59,46,.3);padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
+.nav .in{max-width:560px;margin:0 auto;display:flex}
+.nav button{flex:1;color:#B9AE8C;font-size:10.5px;font-weight:700;letter-spacing:.4px;padding:5px 0 3px;border-radius:12px}
+.nav button .e{display:block;font-size:20px;margin-bottom:2px;filter:grayscale(.4);opacity:.75}
+.nav button.on{color:#F6EBC4}
+.nav button.on .e{filter:none;opacity:1}
+.nav button.on{background:rgba(255,255,255,.08)}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(18,32,22,.55);z-index:80;display:none;align-items:flex-end;justify-content:center}
+.modal.open{display:flex}
+.sheet{background:var(--cream);width:100%;max-width:560px;max-height:88vh;overflow-y:auto;border-radius:22px 22px 0 0;padding:20px 16px 26px;animation:up .2s ease}
+@keyframes up{from{transform:translateY(26px)}to{transform:none}}
+.sheet h3{font-family:Georgia,serif;color:var(--green);font-size:19px;margin-bottom:14px}
+.toast{position:fixed;left:50%;bottom:104px;transform:translateX(-50%) translateY(20px);background:var(--green);color:#F6EBC4;padding:11px 20px;border-radius:30px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:99;box-shadow:0 10px 24px rgba(0,0,0,.25);white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px}
+.chips button{flex:none;padding:7px 14px;border-radius:20px;background:#fff;border:1.5px solid var(--line);font-size:12.5px;font-weight:700;color:var(--mut)}
+.chips button.on{background:var(--green);color:#F6EBC4;border-color:var(--green)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <img src="logo.jpg" alt="Bean Buzz">
+  <div><div class="t1">BEAN BUZZ</div><div class="t2">STALL TRACKER</div></div>
+  <div class="today" id="todayBox"></div>
+</div>
+
+<div class="wrap">
+
+  <!-- ================= HOME ================= -->
+  <section class="page active" id="pg-home">
+    <div class="mswitch">
+      <button onclick="shiftMonth(-1)">‹</button>
+      <div class="mlab"><div class="m" id="mLabHome">November 2026</div><div class="s">MONTH HISAB</div></div>
+      <button onclick="shiftMonth(1)">›</button>
+    </div>
+    <div class="hero">
+      <div class="brand"><img src="logo.jpg" alt=""><div><div class="b1">BEAN BUZZ</div><div class="b2">PREMIUM COFFEE • ESTD 2026</div></div></div>
+      <div class="plabel" id="heroLabel">NET PROFIT (ASLI)</div>
+      <div class="pbig" id="heroProfit">₹0</div>
+      <div class="psub" id="heroSub"></div>
+      <div class="split" id="heroSplit"></div>
+    </div>
+    <div class="grid" id="statGrid"></div>
+    <div id="lowAlerts"></div>
+    <div class="card"><h3><span class="dot"></span>Recent Entries</h3><div id="recentList"></div></div>
+    <div class="card"><h3><span class="dot"></span>Hisab Logic</h3>
+      <p class="note"><b>COGS</b> = Opening Stock + Stock Khareed − Closing Stock. <b>Gross Profit</b> = Sale − COGS − Fresh kharcha − Wastage. <b>Net Profit</b> = Gross − Operating kharcha (Rapido, gas, staff…). <span id="partnerLine">Pura Net Profit <b>Abhinash ka</b> hai — abhi koi partner nahi hai.</span> Mahine ke end me <b>Stock tab me Closing Stock</b> daalte hi asli profit pakka ho jata hai — usse pehle dashboard cash hisab dikhata hai.</p>
+    </div>
+  </section>
+
+  <!-- ================= SALE ================= -->
+  <section class="page" id="pg-sale">
+    <div class="fcard"><h3>＋ Aaj Ka Sale Daalo</h3>
+      <div class="f2">
+        <div class="frow"><label>Date</label><input type="date" id="saleDate"></div>
+        <div class="frow"><label>Total Sale (₹)</label><input type="number" inputmode="numeric" id="saleAmt" placeholder="0"></div>
+      </div>
+      <div class="frow"><label>Note (optional)</label><input type="text" id="saleNote" placeholder="e.g. Sunday rush"></div>
+      <button class="btn" onclick="addSale()">Sale Save Karo</button>
+    </div>
+    <div class="card"><h3><span class="dot"></span><span id="saleListTitle">Sales</span></h3><div id="saleList"></div></div>
+  </section>
+
+  <!-- ================= KHARCHA ================= -->
+  <section class="page" id="pg-cost">
+    <div class="fcard"><h3>＋ Kharcha / Khareed Daalo</h3>
+      <div class="seg" id="kindSeg">
+        <button data-k="stock" class="on" onclick="setKind('stock')">📦 Stock Khareed</button>
+        <button data-k="fresh" onclick="setKind('fresh')">🥬 Fresh (Roz ka)</button>
+        <button data-k="op" onclick="setKind('op')">🧾 Operating</button>
+        <button data-k="waste" onclick="setKind('waste')">🗑 Wastage</button>
+      </div>
+      <div class="frow" id="itemRow"><label>Item</label><select id="costItem" onchange="costAuto()"></select></div>
+      <div class="frow" id="nameRow" style="display:none"><label id="nameLab">Naam</label><input type="text" id="costName" placeholder="e.g. Chicken, Piaj, Tomato"></div>
+      <div class="frow" id="catRow" style="display:none"><label>Category</label>
+        <select id="costCat"><option>Rapido / Delivery</option><option>Gas / Fuel</option><option>Staff</option><option>Menu / Printing</option><option>Bag / Extra Packing</option><option>Disposal / Safai</option><option>Licence / Fees</option><option>Other</option></select></div>
+      <div class="f2">
+        <div class="frow" id="qtyRow"><label>Quantity</label><input type="number" inputmode="decimal" id="costQty" placeholder="0" oninput="costAuto()"></div>
+        <div class="frow"><label>Amount (₹)</label><input type="number" inputmode="decimal" id="costAmt" placeholder="0"></div>
+      </div>
+      <div class="autobox" id="autoBox" style="display:none"></div>
+      <div class="f2">
+        <div class="frow"><label>Date</label><input type="date" id="costDate"></div>
+        <div class="frow"><label>Note (optional)</label><input type="text" id="costNote" placeholder=""></div>
+      </div>
+      <button class="btn" onclick="addCost()">Kharcha Save Karo</button>
+    </div>
+    <div class="chips" id="costChips">
+      <button data-f="all" class="on" onclick="setCostFilter('all')">Sab</button>
+      <button data-f="stock" onclick="setCostFilter('stock')">Stock</button>
+      <button data-f="fresh" onclick="setCostFilter('fresh')">Fresh</button>
+      <button data-f="op" onclick="setCostFilter('op')">Operating</button>
+      <button data-f="waste" onclick="setCostFilter('waste')">Wastage</button>
+    </div>
+    <div class="card"><h3><span class="dot"></span><span id="costListTitle">Kharcha</span></h3><div id="costList"></div></div>
+  </section>
+
+  <!-- ================= STOCK ================= -->
+  <section class="page" id="pg-stock">
+    <div class="card"><h3><span class="dot"></span>Stock — <span id="stockMonthLab"></span></h3>
+      <p class="note" style="margin-bottom:8px">Stock = Opening + Khareed − Wastage. Kisi item pe tap karke rate / opening / low-alert badal sakte ho.</p>
+      <div id="stockList"></div>
+      <button class="btn ghost sm" style="margin-top:12px" onclick="openItem()">＋ Naya Item Jodo</button>
+    </div>
+    <div class="card"><h3><span class="dot"></span>Month-End Closing Stock</h3>
+      <p class="note" style="margin-bottom:10px">Mahine ke last din jo maal asal me bacha hai wo gin ke daalo — tabhi <b>asli (COGS) profit</b> pakka hoga. Khali chhoda = app wahi stock manega jo hisab se bacha hai.</p>
+      <div id="closingList"></div>
+      <button class="btn gold" style="margin-top:12px" onclick="saveClosing()">Closing Stock Save Karo</button>
+    </div>
+  </section>
+
+  <!-- ================= HISAB ================= -->
+  <section class="page" id="pg-hisab">
+    <div class="mswitch">
+      <button onclick="shiftMonth(-1)">‹</button>
+      <div class="mlab"><div class="m" id="mLabHisab">November 2026</div><div class="s">P&amp;L STATEMENT</div></div>
+      <button onclick="shiftMonth(1)">›</button>
+    </div>
+    <div class="card"><h3><span class="dot"></span>Monthly Profit &amp; Loss</h3><div id="plBody"></div></div>
+    <div class="card"><h3><span class="dot"></span>Weekly Hisab (Mon–Sun)</h3>
+      <p class="note" id="weekNote" style="margin-bottom:8px">Har hafte ka saaf hisab — sale, kharcha aur profit. Week ka hisab cash method par hai.</p>
+      <div id="weekList"></div>
+    </div>
+    <div class="card"><h3><span class="dot"></span>Google Sheet Sync</h3>
+      <p class="note" style="margin-bottom:10px"><b>Sheet hi master hai</b> — app khulte hi Sheet ka latest data apne aap aa jata hai, kuch update karne ki zaroorat nahi. App me entry karne ke baad Sync dabao to Sheet bhi update ho jayegi.</p>
+      <button class="btn sm" onclick="syncNow()">🔄 Sheet Update Karo (Sync)</button>
+      <button class="btn alt sm" style="margin-top:9px" onclick="cloudPull(true)">⬇ Sheet Se Latest Data Lao</button>
+      <p class="note" id="syncStatus" style="margin-top:9px"></p>
+      <button class="btn ghost sm" style="margin-top:6px" onclick="openSheet()">📄 Google Sheet Kholo</button>
+      <div class="frow" style="margin-top:12px"><label>Sync Link (Apps Script URL)</label><input type="text" id="syncUrl" placeholder="https://script.google.com/macros/s/…/exec"></div>
+    </div>
+    <div class="card"><h3><span class="dot"></span>Report / Backup</h3>
+      <button class="btn sm" onclick="shareReport()">📲 Hisab Report WhatsApp Par Bhejo</button>
+      <button class="btn ghost sm" style="margin-top:10px" onclick="exportData()">⬇ Backup Copy Karo (JSON)</button>
+      <div class="frow" style="margin-top:12px"><label>Backup Wapas Daalo (paste)</label><textarea id="importBox" rows="3" placeholder="Purana backup yahan paste karo"></textarea></div>
+      <button class="btn ghost sm" onclick="importData()">⬆ Backup Restore Karo</button>
+    </div>
+  </section>
+</div>
+
+<!-- item modal -->
+<div class="modal" id="itemModal"><div class="sheet">
+  <h3 id="itemModalTitle">Item</h3>
+  <input type="hidden" id="itId">
+  <div class="frow"><label>Item ka Naam</label><input type="text" id="itName"></div>
+  <div class="f2">
+    <div class="frow"><label>Unit</label><input type="text" id="itUnit" placeholder="pc / gm / packet / bottle"></div>
+    <div class="frow"><label>Rate (₹ per unit)</label><input type="number" inputmode="decimal" id="itRate"></div>
+  </div>
+  <div class="f2">
+    <div class="frow"><label>Opening Qty (1 Nov)</label><input type="number" inputmode="decimal" id="itOpen"></div>
+    <div class="frow"><label>Low Stock Alert (qty)</label><input type="number" inputmode="decimal" id="itLow"></div>
+  </div>
+  <button class="btn" onclick="saveItem()">Save Karo</button>
+  <button class="btn ghost" style="margin-top:10px" onclick="closeItem()">Cancel</button>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<nav class="nav"><div class="in">
+  <button data-p="home" class="on" onclick="go('home')"><span class="e">🏠</span>Home</button>
+  <button data-p="sale" onclick="go('sale')"><span class="e">💰</span>Sale</button>
+  <button data-p="cost" onclick="go('cost')"><span class="e">🧾</span>Kharcha</button>
+  <button data-p="stock" onclick="go('stock')"><span class="e">📦</span>Stock</button>
+  <button data-p="hisab" onclick="go('hisab')"><span class="e">📊</span>Hisab</button>
+</div></nav>
+
+<script>
+/* ================= CORE: DATA + HISAB LOGIC ================= */
+var FIRST_MONTH = '2026-11'; // opening stock counted on 01 Nov 2026
+var LS_KEY = 'beanbuzz_tracker_v2';
+var APP_VERSION = 5;
+var REMOTE_BASE = 'https://higgsfieldaiofficial-netizen.github.io/beanbuzz-tracker/';
+var Store = {
+  get: function(){ try{ if (window.AndroidStore) { var v = AndroidStore.read(LS_KEY); if (v) return v; } }catch(e){} try{ return localStorage.getItem(LS_KEY); }catch(e){ return null; } },
+  set: function(v){ try{ if (window.AndroidStore) { AndroidStore.write(LS_KEY, v); return; } }catch(e){} try{ localStorage.setItem(LS_KEY, v); }catch(e){} }
+};
+
+/* Item master — rate list from the notebook (per-unit cost).
+   open = quantity counted in Opening Stock, 01/11/2026. Sab editable hai. */
+var SEED_ITEMS = [
+ ['hotglass','Hot Coffee Glass 210ml','pc',2.4,47,25],
+ ['chocglass','Chocolate Coffee Glass 250ml','pc',5.6,23,25],
+ ['coffeeglass','Coffee Glass 350ml','pc',5.5,216,50],
+ ['packglass','Packing Coffee Glass 350ml','pc',5.5,3,25],
+ ['soupglass','Soup Glass','pc',0.28,350,100],
+ ['friesbox','Fries Box','pc',7,126,25],
+ ['chatbowl','Chat Bowl','pc',3.5,31,25],
+ ['monoplate','Mono Plate (Small White)','pc',0.8,100,50],
+ ['momoplate','Momo Plate','packet',45,1,1],
+ ['tissue','Tissue','packet',11,5,2],
+ ['straw','Black Straw','packet',50,4,2],
+ ['momospoon','Momo Spoon','packet',70,3,1],
+ ['burgerstick','Burger Stick','packet',45,1,1],
+ ['bigplate','Big Plate','pc',2.39,18,10],
+ ['packbox','Packing Box / Container','pc',5,3,25],
+ ['momopack','Momo Packing Plastic','packet',80,6,2],
+ ['satni','Momo Packing Chutney (Satni)','packet',40,2,1],
+ ['jholbowl','Jhol Momo Bowl','packet',45,2,1],
+ ['momo','Momo','pc',6,150,100],
+ ['kmomo','Kurkure Momo','pc',8,0,50],
+ ['vegmomo','Veg Momo','pc',7,0,50],
+ ['blueberry','Blueberry Crush 750ml','bottle',257,1.5,1],
+ ['strawberry','Strawberry Crush 750ml','bottle',152,1.5,1],
+ ['tomatosauce','Tomato Sauce 1.2kg','bottle',85,1,1],
+ ['caramel','Caramel Coffee','gm',0.348,600,200],
+ ['frappe','Frappe','gm',0.428,885,200],
+ ['sugar','Sugar','gm',0.057,1000,500],
+ ['milkpowder','Milk Powder','gm',0.465,700,200],
+ ['biscoff','Biscoff','packet',235,2,1],
+ ['coffee','Coffee','gm',0.999,750,200],
+ ['fries','Fries','gm',0.1044,2500,1000],
+ ['hershey','Hershey Syrup','bottle',0,0,1],
+ ['cheesedress','Cheese Dressing 1kg','packet',180,1,1],
+ ['cheese','Cheese','packet',150,1,1],
+ ['periperi','Peri Peri 250gm','packet',166,0,1],
+ ['mayo','Veeba Magic Mayonnaise 1kg','packet',76,3,1],
+ ['tandoori','Tandoori Mayonnaise 1kg','packet',209.5,1,1],
+ ['besan','Besan','gm',0.057,0,500],
+ ['cornflour','Cornflour','gm',0.0667,0,500],
+ ['maida','Maida','gm',0.0522,0,500],
+ ['chatmasala','Chat Masala 100gm','packet',79.5,0,1],
+ ['chilly','Chilly Powder','gm',0.0514,0,500],
+ ['ginger','Ginger Powder','packet',71,0,1],
+ ['garlic','Garlic Powder 400gm','packet',209,0,1],
+ ['sweetcorn','Sweet Corn','packet',110,1,1],
+ ['paprika','Sweet Paprika 454gm','packet',452,0,1],
+ ['aromatic','Aromatic Powder 500gm','packet',171,0,1],
+ ['sriracha','Sriracha Sauce 570gm','bottle',238,0,1],
+ ['amulmilk','Amul Milk 1L','pc',78.33,13,6],
+ ['icecream','Ice Cream','gm',0.0813,1500,500],
+ ['breadcrumbs','Breadcrumbs','gm',0.142,1000,200],
+ ['cornflakes','Cornflakes 500gm','packet',110,1,1],
+ ['badam','Badam','gm',0.18,0,200],
+ ['refine','Refine Oil','ml',0.164,2600,750]
+];
+
+/* Sales seed — notebook: 1 Nov 4590, 2 Nov 6589, 3 Nov 4230, 5 Nov 5020, 6 Nov 4854 */
+var SEED_SALES = [
+ ['2026-11-01',4590,''],['2026-11-02',6589,''],['2026-11-03',4230,''],
+ ['2026-11-05',5020,'Notebook me date par 4 ke upar 5 likha hai'],['2026-11-06',4854,''],
+ ['2026-11-07',0,'Dukan Bandh'],['2026-11-08',0,'Dukan Bandh'],['2026-11-09',0,'Dukan Bandh'],
+ ['2026-11-10',0,'Dukan Bandh'],['2026-11-11',0,'Dukan Bandh']
+];
+
+/* Kharcha seed — [date, kind, itemId|null, name, qty, amount, note]
+   kind: stock | fresh | op | waste   (Oct wali entries opening stock banane ki khareed hai) */
+var SEED_COSTS = [
+ ['2026-10-29','stock','chocglass','',50,280,'250ml glass 50pc'],
+ ['2026-10-29','stock','bigplate','',18,45,'Plate'],
+ ['2026-10-29','stock','hotglass','',25,60,'Hot glass 25pc'],
+ ['2026-10-29','stock','burgerstick','',1,40,''],
+ ['2026-10-29','stock','maida','',5000,261,'Maida 5kg'],
+ ['2026-10-29','stock',null,'Stock item (line unclear)',0,261,'Notebook line saaf nahi'],
+ ['2026-10-29','stock','ginger','',1,71,''],
+ ['2026-10-29','stock','garlic','',1,209,''],
+ ['2026-10-29','stock','sriracha','',1,233,'570gm'],
+ ['2026-10-29','stock','sweetcorn','',1,110,''],
+ ['2026-10-29','stock','paprika','',1,452,''],
+ ['2026-10-29','stock','aromatic','',1,171,'500gm'],
+ ['2026-10-29','stock','refine','',4000,495,'Refine 4L'],
+ ['2026-10-30','fresh',null,'Dhania',0,20,''],
+ ['2026-10-30','op',null,'Menu / Printing',0,50,'Menu'],
+ ['2026-10-31','stock','momo','',283,1700,'Momo lot'],
+ ['2026-10-31','stock','amulmilk','',12,943,'Amul milk case'],
+ ['2026-10-31','op',null,'Other',0,1128,'Notebook me "Abhinash" likha hai'],
+ ['2026-10-31','op',null,'Rapido / Delivery',0,73,'Rapido'],
+ ['2026-11-01','stock','momo','',200,1200,'S Momo 200pc'],
+ ['2026-11-01','stock','kmomo','',100,800,'K Momo 100pc'],
+ ['2026-11-01','op',null,'Rapido / Delivery',0,82,'Rapido'],
+ ['2026-11-01','stock','vegmomo','',50,350,'Veg Momo'],
+ ['2026-11-01','fresh',null,'Chips',0,200,''],
+ ['2026-11-01','fresh',null,'Chips',0,20,''],
+ ['2026-11-02','stock','momo','',300,1800,''],
+ ['2026-11-02','stock','monoplate','',150,120,'Mono plate'],
+ ['2026-11-02','op',null,'Rapido / Delivery',0,110,'Rapido'],
+ ['2026-11-02','fresh',null,'Onion / Piaj',0,100,''],
+ ['2026-11-03','stock','momo','',300,1800,'300 Momo'],
+ ['2026-11-03','stock','milkpowder','',1000,465,'1kg'],
+ ['2026-11-03','stock','caramel','',600,209,'Chocolate/Caramel 600gm'],
+ ['2026-11-03','stock','tomatosauce','',1,76,'1 bottle'],
+ ['2026-11-03','stock','mayo','',2,170,'Mayo'],
+ ['2026-11-03','stock','breadcrumbs','',1000,142,'1kg'],
+ ['2026-11-03','stock','tissue','',9,100,'9 packet'],
+ ['2026-11-03','stock','momospoon','',1,70,'1 packet'],
+ ['2026-11-03','fresh',null,'Chicken',0,650,''],
+ ['2026-11-03','stock','badam','',1000,180,'Badam 1kg'],
+ ['2026-11-03','fresh',null,'Milk (roz ka)',0,340,''],
+ ['2026-11-03','op',null,'Bag / Extra Packing',0,15,'Bag'],
+ ['2026-11-03','stock','packbox','',71,357,'Container'],
+ ['2026-11-03','stock','packbox','',24,119,'Container'],
+ ['2026-11-03','op',null,'Rapido / Delivery',0,110,'Rapido'],
+ ['2026-11-04','fresh',null,'Onion / Piaj',0,50,''],
+ ['2026-11-05','fresh',null,'Onion / Piaj',0,20,''],
+ ['2026-11-05','fresh',null,'Onion / Piaj',0,60,'Piaj'],
+ ['2026-11-05','fresh',null,'Chips',0,100,''],
+ ['2026-11-05','fresh',null,'Chicken',0,50,''],
+ ['2026-11-06','fresh',null,'Tomato',0,20,''],
+ ['2026-11-06','stock','momo','',333,2000,'C/K Momo lot'],
+ ['2026-11-07','stock','fries','',5000,375,'7 Nov group — notebook total 2345 se balance'],
+ ['2026-11-07','stock','mayo','',1,76,'Mayo 1 packet'],
+ ['2026-11-07','stock','besan','',10000,571,'Besan ~10kg @57'],
+ ['2026-11-07','stock','cornflour','',5000,333,'Cornflour 5kg @66'],
+ ['2026-11-07','stock','refine','',6000,990,'Refine 750ml x 8'],
+ ['2026-11-07','stock','momo','',300,1800,'C Momo 300 x 6'],
+ ['2026-11-07','op',null,'Disposal / Safai',0,305,'Disposal'],
+ ['2026-11-07','op',null,'Rapido / Delivery',0,110,'Rapido'],
+ ['2026-11-07','fresh',null,'Chicken',0,250,''],
+ ['2026-11-07','fresh',null,'Tomato',0,20,''],
+ ['2026-11-07','fresh',null,'Dhania',0,20,'']
+];
+
+var DB = null;
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function seedDB(){
+  var d = { items:[], sales:[], costs:[], closings:{}, settlements:[], meta:{ updatedAt: 1 }, settings:{ partner: false } };
+  SEED_ITEMS.forEach(function(r){ d.items.push({id:r[0],name:r[1],unit:r[2],rate:r[3],open:r[4],low:r[5]}); });
+  SEED_SALES.forEach(function(r){ d.sales.push({id:uid()+Math.random(),date:r[0],amount:r[1],note:r[2]}); });
+  SEED_COSTS.forEach(function(r){ d.costs.push({id:uid()+Math.random(),date:r[0],kind:r[1],itemId:r[2],name:r[3],qty:r[4],amount:r[5],note:r[6]}); });
+  return d;
+}
+function load(){
+  try{ var raw = Store.get(); if(raw){ DB = JSON.parse(raw); if(DB && DB.items){ if(!DB.meta) DB.meta = { updatedAt: 1 }; if(!DB.settings) DB.settings = { partner: false }; return; } } }catch(e){}
+  DB = seedDB(); save();
+}
+function save(){ DB.meta = DB.meta || {}; DB.meta.updatedAt = Date.now(); try{ Store.set(JSON.stringify(DB)); }catch(e){} }
+function PARTNER(){ return !!(DB.settings && DB.settings.partner); }
+function itemById(id){ for(var i=0;i<DB.items.length;i++) if(DB.items[i].id===id) return DB.items[i]; return null; }
+
+/* ---------- date helpers ---------- */
+function mkey(dstr){ return dstr.slice(0,7); }
+function monthShift(mk, delta){
+  var p = mk.split('-'), y = +p[0], m = +p[1]-1+delta;
+  y += Math.floor(m/12); m = ((m%12)+12)%12;
+  return y + '-' + ('0'+(m+1)).slice(-2);
+}
+function monthLabel(mk){
+  var names=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var p=mk.split('-'); return names[+p[1]-1]+' '+p[0];
+}
+function dstrOf(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+function fmtDate(dstr){
+  var p=dstr.split('-'); var names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return (+p[2])+' '+names[+p[1]-1];
+}
+function inMonth(dstr, mk){ return mkey(dstr)===mk; }
+function cmpMonth(a,b){ return a<b?-1:(a>b?1:0); }
+
+/* ---------- stock math ---------- */
+function qtyDelta(itemId, mk, kinds){
+  var q=0;
+  DB.costs.forEach(function(c){
+    if(c.itemId!==itemId || !c.qty) return;
+    if(kinds.indexOf(c.kind)<0) return;
+    if(mkey(c.date)!==mk) return;
+    q += (c.kind==='waste' ? -c.qty : c.qty);
+  });
+  return q;
+}
+function runningQty(item, mk){
+  /* qty at end of month mk. Oct-2026 khareed opening stock me pehle se gini hai,
+     isliye FIRST_MONTH se pehle ki entries qty me dobara nahi judti. */
+  var q = item.open, m = FIRST_MONTH;
+  while(cmpMonth(m, mk) <= 0){
+    q += qtyDelta(item.id, m, ['stock','waste']);
+    if(m===mk) break;
+    m = monthShift(m, 1);
+  }
+  return q;
+}
+function openingQtyFor(item, mk){
+  if(cmpMonth(mk, FIRST_MONTH) < 0) return 0;
+  if(cmpMonth(mk, FIRST_MONTH) === 0) return item.open;
+  var prev = monthShift(mk, -1);
+  var cl = DB.closings[prev];
+  if(cl && cl[item.id] !== undefined && cl[item.id] !== null && cl[item.id] !== '') return +cl[item.id];
+  return runningQty(item, prev);
+}
+function closingQtyFor(item, mk){
+  var cl = DB.closings[mk];
+  if(cl && cl[item.id] !== undefined && cl[item.id] !== null && cl[item.id] !== '') return +cl[item.id];
+  return openingQtyFor(item, mk) + qtyDelta(item.id, mk, ['stock','waste']);
+}
+function hasClosing(mk){
+  var cl = DB.closings[mk]; if(!cl) return false;
+  return Object.keys(cl).some(function(k){ return cl[k]!=='' && cl[k]!==null && cl[k]!==undefined; });
+}
+
+/* ---------- P&L ---------- */
+function plCalc(mk){
+  var sales=0, stockBuy=0, fresh=0, op=0, wasteAmt=0;
+  DB.sales.forEach(function(s){ if(inMonth(s.date,mk)) sales += +s.amount; });
+  DB.costs.forEach(function(c){
+    if(!inMonth(c.date,mk)) return;
+    if(c.kind==='stock') stockBuy += +c.amount;
+    else if(c.kind==='fresh') fresh += +c.amount;
+    else if(c.kind==='op') op += +c.amount;
+    else if(c.kind==='waste') wasteAmt += +c.amount;
+  });
+  var openVal=0, closeVal=0, cogsStock=0;
+  DB.items.forEach(function(it){
+    var oq = openingQtyFor(it, mk), cq = closingQtyFor(it, mk);
+    var bought = qtyDelta(it.id, mk, ['stock']);
+    var wasted = -qtyDelta(it.id, mk, ['waste']);
+    var consumed = oq + bought - wasted - cq;
+    openVal += oq * it.rate;
+    closeVal += cq * it.rate;
+    cogsStock += consumed * it.rate;
+  });
+  var cogs = cogsStock + fresh + wasteAmt;
+  var gross = sales - cogs;
+  var net = gross - op;
+  var cashProfit = sales - (stockBuy + fresh + op + wasteAmt);
+  var closed = hasClosing(mk);
+  return { sales:sales, stockBuy:stockBuy, fresh:fresh, op:op, wasteAmt:wasteAmt,
+           openVal:openVal, closeVal:closeVal, cogsStock:cogsStock, cogs:cogs,
+           gross:gross, net:net, cashProfit:cashProfit, closed:closed,
+           displayProfit: closed ? net : cashProfit, isTrue: closed };
+}
+
+/* ---------- weeks (Mon-Sun) ---------- */
+function mondayOf(dstr){
+  var p=dstr.split('-'), d=new Date(+p[0], +p[1]-1, +p[2]);
+  var day=(d.getDay()+6)%7; d.setDate(d.getDate()-day); return d;
+}
+function weeksOfMonth(mk){
+  var p=mk.split('-'), y=+p[0], mo=+p[1]-1;
+  var first=new Date(y,mo,1), last=new Date(y,mo+1,0);
+  var weeks=[], cur=mondayOf(dstrOf(first)), guard=0;
+  while(cur<=last && guard<8){
+    var end=new Date(cur); end.setDate(end.getDate()+6);
+    weeks.push({start:dstrOf(cur), end:dstrOf(end)});
+    cur=new Date(end); cur.setDate(cur.getDate()+1); guard++;
+  }
+  return weeks;
+}
+function weekCalc(w){
+  var sales=0, out=0;
+  DB.sales.forEach(function(s){ if(s.date>=w.start && s.date<=w.end) sales += +s.amount; });
+  DB.costs.forEach(function(c){ if(c.date>=w.start && c.date<=w.end) out += +c.amount; });
+  var profit = sales - out;
+  var settled = 0;
+  DB.settlements.forEach(function(x){ if(x.week===w.start) settled += +x.amount; });
+  return { sales:sales, out:out, profit:profit, share:Math.max(profit,0)/2, settled:settled };
+}
+function inr(n){
+  var neg = n<0; n = Math.round(Math.abs(n));
+  var s = n.toString(), last3 = s.slice(-3), rest = s.slice(0,-3);
+  var out = rest ? rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + last3 : last3;
+  return (neg?'-₹':'₹') + out;
+}
+function qtyFmt(q){
+  if(q===null || q===undefined) return '—';
+  var r = Math.round(q*100)/100;
+  return (r % 1 === 0) ? r.toString() : r.toString();
+}
+</script>
+
+<script>
+/* ================= UI ================= */
+var SHEET_URL = 'https://docs.google.com/spreadsheets/d/1SQ9-s8lY96hutC6y-kk3aEBebIu6qouVxpcEzBcu1BM/edit';
+var SYNC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbzBfmFNVVKMbLoJ85EHOmhmx8CGjWVtEKMysKJE27v21HxVvwpQb6aY9WaZWnDcaZhw/exec';
+var curMonth = FIRST_MONTH;
+var costKind = 'stock';
+var costFilter = 'all';
+var KINDLBL = { stock:'Stock', fresh:'Fresh', op:'Operating', waste:'Wastage' };
+var SHEETLBL = { stock:'Stock Purchase', fresh:'Fresh (roz ka)', op:'Operating', waste:'Wastage' };
+var KINDICON = { stock:'📦', fresh:'🥬', op:'🧾', waste:'🗑' };
+
+function toast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+function go(p){
+  document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('active'); });
+  document.getElementById('pg-'+p).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-p')===p); });
+  render();
+  window.scrollTo(0,0);
+}
+function shiftMonth(d){ curMonth = monthShift(curMonth, d); render(); }
+function esc(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+function render(){
+  document.getElementById('mLabHome').textContent = monthLabel(curMonth);
+  document.getElementById('mLabHisab').textContent = monthLabel(curMonth);
+  document.getElementById('stockMonthLab').textContent = monthLabel(curMonth);
+  renderHome(); renderSales(); renderCosts(); renderStock(); renderHisab();
+}
+
+/* ---------- HOME ---------- */
+function renderHome(){
+  var p = plCalc(curMonth);
+  document.getElementById('heroLabel').textContent = p.isTrue ? 'NET PROFIT (ASLI — CLOSING STOCK KE SAATH)' : 'CASH PROFIT (ASLI PROFIT CLOSING STOCK KE BAAD)';
+  document.getElementById('heroProfit').textContent = inr(p.displayProfit);
+  document.getElementById('heroSub').textContent = monthLabel(curMonth) + ' • Sale ' + inr(p.sales) + (p.isTrue ? ' • COGS ' + inr(p.cogs) : ' • Kul kharcha ' + inr(p.stockBuy + p.fresh + p.op + p.wasteAmt));
+  var hs = document.getElementById('heroSplit');
+  if (PARTNER()) {
+    var sh = Math.max(p.displayProfit, 0) / 2;
+    hs.innerHTML = '<div class="sp"><div class="n">ABHINASH — 50%</div><div class="v">' + inr(sh) + '</div></div><div class="sp"><div class="n">PARTNER — 50%</div><div class="v">' + inr(sh) + '</div></div>';
+  } else {
+    hs.innerHTML = '<div class="sp"><div class="n">OWNER — PURA PROFIT</div><div class="v" style="font-size:18px">Abhinash Changmai • 100%</div></div>';
+  }
+  document.getElementById('partnerLine').innerHTML = PARTNER()
+    ? 'Phir Net Profit ka <b>50 : 50</b> hissa — aadha Abhinash, aadha Partner.'
+    : 'Pura Net Profit <b>Abhinash ka</b> hai — abhi koi partner nahi hai.';
+  var g = document.getElementById('statGrid');
+  g.innerHTML =
+    stat('Total Sale', inr(p.sales)) +
+    stat('Stock Khareed', inr(p.stockBuy)) +
+    stat('Fresh Kharcha', inr(p.fresh)) +
+    stat('Operating', inr(p.op)) +
+    stat('Wastage', inr(p.wasteAmt), 'red') +
+    stat('Stock Value (abhi)', inr(p.closeVal), 'gold');
+  function stat(k, v, cls){ return '<div class="stat '+(cls||'')+'"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>'; }
+
+  var lows = DB.items.filter(function(it){ var q = runningQty(it, curMonth); return it.low > 0 && q <= it.low; });
+  var la = document.getElementById('lowAlerts');
+  la.innerHTML = lows.length ? lows.map(function(it){
+    return '<div class="alert">⚠️ <div><b>Low Stock:</b> ' + esc(it.name) + ' — sirf <b>' + qtyFmt(runningQty(it, curMonth)) + ' ' + esc(it.unit) + '</b> bacha hai</div></div>';
+  }).join('') : '';
+
+  var all = [];
+  DB.sales.forEach(function(s){ all.push({date:s.date, icon:'💰', cls:'g', a:'Sale — ' + fmtDate(s.date), b:s.note||'Daily sale', amt:+s.amount}); });
+  DB.costs.forEach(function(c){ all.push({date:c.date, icon:KINDICON[c.kind], cls:c.kind==='waste'?'r':'', a:costLabel(c), b:fmtDate(c.date) + ' • ' + KINDLBL[c.kind] + (c.note ? ' • ' + c.note : ''), amt:-c.amount}); });
+  all.sort(function(x,y){ return y.date < x.date ? -1 : (y.date > x.date ? 1 : 0); });
+  var rl = document.getElementById('recentList');
+  rl.innerHTML = all.length ? all.slice(0,8).map(function(r){
+    return '<div class="row"><div class="ic '+r.cls+'">'+r.icon+'</div><div class="mid"><div class="a">'+esc(r.a)+'</div><div class="b">'+esc(r.b)+'</div></div><div class="amt '+(r.amt<0?'neg':'')+'">'+inr(r.amt)+'</div></div>';
+  }).join('') : '<div class="empty">Abhi koi entry nahi hai</div>';
+}
+function costLabel(c){
+  if(c.itemId){ var it = itemById(c.itemId); if(it) return it.name + (c.qty ? ' × ' + qtyFmt(c.qty) : ''); }
+  return c.name || 'Kharcha';
+}
+
+/* ---------- SALE ---------- */
+function addSale(){
+  var d = document.getElementById('saleDate').value;
+  var a = parseFloat(document.getElementById('saleAmt').value);
+  var n = document.getElementById('saleNote').value.trim();
+  if(!d || !a){ toast('Date aur amount daalo'); return; }
+  DB.sales.push({id:uid(), date:d, amount:a, note:n});
+  save(); document.getElementById('saleAmt').value=''; document.getElementById('saleNote').value='';
+  curMonth = mkey(d); render(); toast('Sale save ho gaya ✅');
+}
+function delSale(id){
+  if(!confirm('Ye sale entry delete kar dein?')) return;
+  DB.sales = DB.sales.filter(function(s){ return s.id!==id; });
+  save(); render();
+}
+function renderSales(){
+  var list = DB.sales.filter(function(s){ return inMonth(s.date, curMonth); })
+                     .sort(function(a,b){ return a.date<b.date?-1:1; });
+  var tot = list.reduce(function(t,s){ return t + (+s.amount); }, 0);
+  document.getElementById('saleListTitle').textContent = 'Sales — ' + monthLabel(curMonth) + ' • Total ' + inr(tot);
+  var el = document.getElementById('saleList');
+  el.innerHTML = list.length ? list.map(function(s){
+    return '<div class="row"><div class="ic g">💰</div><div class="mid"><div class="a">' + fmtDate(s.date) + ' — Sale</div><div class="b">' + esc(s.note||'Daily total sale') + '</div></div><div class="amt">' + inr(s.amount) + '</div><button class="del" onclick="delSale(\''+s.id+'\')">✕</button></div>';
+  }).join('') : '<div class="empty">Is mahine koi sale entry nahi</div>';
+}
+
+/* ---------- KHARCHA ---------- */
+function setKind(k){
+  costKind = k;
+  document.querySelectorAll('#kindSeg button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-k')===k); });
+  var needsItem = (k==='stock' || k==='waste');
+  document.getElementById('itemRow').style.display = needsItem ? '' : 'none';
+  document.getElementById('qtyRow').style.display = needsItem ? '' : 'none';
+  document.getElementById('nameRow').style.display = needsItem ? 'none' : '';
+  document.getElementById('catRow').style.display = (k==='op') ? '' : 'none';
+  document.getElementById('nameLab').textContent = (k==='op') ? 'Category naam (auto)' : 'Cheez ka naam';
+  if(k==='op'){ document.getElementById('costName').value = document.getElementById('costCat').value; }
+  costAuto();
+}
+function fillItemSelect(){
+  var sel = document.getElementById('costItem');
+  sel.innerHTML = DB.items.map(function(it){
+    return '<option value="'+it.id+'">' + esc(it.name) + ' (' + esc(it.unit) + ' • ₹' + it.rate + ')</option>';
+  }).join('');
+}
+function costAuto(){
+  var box = document.getElementById('autoBox');
+  if(costKind==='stock' || costKind==='waste'){
+    var it = itemById(document.getElementById('costItem').value);
+    var q = parseFloat(document.getElementById('costQty').value);
+    if(it){
+      box.style.display = '';
+      if(q){
+        var amt = Math.round(q * it.rate * 100)/100;
+        document.getElementById('costAmt').value = amt;
+        box.innerHTML = 'Auto hisab: ' + qtyFmt(q) + ' ' + esc(it.unit) + ' × ₹' + it.rate + ' = <b>' + inr(amt) + '</b> (amount badal bhi sakte ho)';
+      } else {
+        box.innerHTML = 'Rate: <b>₹' + it.rate + ' / ' + esc(it.unit) + '</b> — qty daalte hi amount apne aap bhar jayega';
+      }
+      return;
+    }
+  }
+  box.style.display = 'none';
+}
+function addCost(){
+  var d = document.getElementById('costDate').value;
+  var a = parseFloat(document.getElementById('costAmt').value);
+  if(!d || !a){ toast('Date aur amount daalo'); return; }
+  var rec = { id:uid(), date:d, kind:costKind, itemId:null, name:'', qty:0, amount:a, note:document.getElementById('costNote').value.trim() };
+  if(costKind==='stock' || costKind==='waste'){
+    rec.itemId = document.getElementById('costItem').value;
+    rec.qty = parseFloat(document.getElementById('costQty').value) || 0;
+  } else if(costKind==='op'){
+    rec.name = document.getElementById('costCat').value;
+    var extra = document.getElementById('costName').value.trim();
+    if(extra && extra !== rec.name) rec.note = extra + (rec.note ? ' • ' + rec.note : '');
+  } else {
+    rec.name = document.getElementById('costName').value.trim() || 'Fresh item';
+  }
+  DB.costs.push(rec); save();
+  document.getElementById('costAmt').value=''; document.getElementById('costQty').value=''; document.getElementById('costNote').value='';
+  curMonth = mkey(d); render(); toast('Kharcha save ho gaya ✅');
+}
+function delCost(id){
+  if(!confirm('Ye kharcha entry delete kar dein?')) return;
+  DB.costs = DB.costs.filter(function(c){ return c.id!==id; });
+  save(); render();
+}
+function setCostFilter(f){
+  costFilter = f;
+  document.querySelectorAll('#costChips button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-f')===f); });
+  renderCosts();
+}
+function renderCosts(){
+  var list = DB.costs.filter(function(c){ return inMonth(c.date, curMonth) && (costFilter==='all' || c.kind===costFilter); })
+                     .sort(function(a,b){ return a.date<b.date?-1:1; });
+  var tot = list.reduce(function(t,c){ return t + (+c.amount); }, 0);
+  document.getElementById('costListTitle').textContent = 'Kharcha — ' + monthLabel(curMonth) + ' • Total ' + inr(tot);
+  var el = document.getElementById('costList');
+  el.innerHTML = list.length ? list.map(function(c){
+    return '<div class="row"><div class="ic '+(c.kind==='waste'?'r':'')+'">'+KINDICON[c.kind]+'</div><div class="mid"><div class="a">'+esc(costLabel(c))+' <span class="tag '+c.kind+'">'+KINDLBL[c.kind]+'</span></div><div class="b">'+fmtDate(c.date)+(c.note ? ' • ' + esc(c.note) : '')+'</div></div><div class="amt neg">−'+inr(c.amount)+'</div><button class="del" onclick="delCost(\''+c.id+'\')">✕</button></div>';
+  }).join('') : '<div class="empty">Is mahine koi kharcha entry nahi</div>';
+}
+
+/* ---------- STOCK ---------- */
+function renderStock(){
+  var el = document.getElementById('stockList');
+  el.innerHTML = DB.items.map(function(it){
+    var q = runningQty(it, curMonth);
+    var val = q * it.rate;
+    var low = it.low > 0 && q <= it.low;
+    var pct = it.open > 0 ? Math.max(0, Math.min(100, q / (it.open*1.6) * 100)) : 60;
+    return '<div class="stockitem" onclick="openItem(\''+it.id+'\')"><div class="l1"><span class="nm">'+esc(it.name)+'</span><span class="vl">'+inr(val)+'</span></div>' +
+      '<div class="l2"><span>Stock: <b>'+qtyFmt(q)+' '+esc(it.unit)+'</b></span><span>Rate: ₹'+it.rate+'</span>' +
+      (low ? '<span class="lowb">LOW STOCK</span>' : '<span class="okb">OK</span>') + '</div>' +
+      '<div class="progress"><i style="width:'+pct+'%"></i></div></div>';
+  }).join('');
+  var cl = DB.closings[curMonth] || {};
+  var cel = document.getElementById('closingList');
+  cel.innerHTML = DB.items.map(function(it){
+    var run = runningQty(it, curMonth);
+    var v = (cl[it.id] !== undefined && cl[it.id] !== '') ? cl[it.id] : '';
+    return '<div class="row"><div class="mid"><div class="a" style="font-size:13.5px">'+esc(it.name)+'</div><div class="b">Hisab se: '+qtyFmt(run)+' '+esc(it.unit)+'</div></div><input type="number" inputmode="decimal" class="closein" data-item="'+it.id+'" placeholder="'+qtyFmt(run)+'" value="'+v+'"></div>';
+  }).join('');
+}
+function saveClosing(){
+  var cl = {};
+  document.querySelectorAll('#closingList .closein').forEach(function(inp){
+    if(inp.value !== '') cl[inp.getAttribute('data-item')] = parseFloat(inp.value);
+  });
+  DB.closings[curMonth] = cl; save(); render();
+  toast('Closing stock save — asli profit tayyar ✅');
+}
+function openItem(id){
+  var it = id ? itemById(id) : null;
+  document.getElementById('itemModalTitle').textContent = it ? 'Item Badlo — ' + it.name : 'Naya Item';
+  document.getElementById('itId').value = it ? it.id : '';
+  document.getElementById('itName').value = it ? it.name : '';
+  document.getElementById('itUnit').value = it ? it.unit : 'pc';
+  document.getElementById('itRate').value = it ? it.rate : '';
+  document.getElementById('itOpen').value = it ? it.open : 0;
+  document.getElementById('itLow').value = it ? it.low : 0;
+  document.getElementById('itemModal').classList.add('open');
+}
+function closeItem(){ document.getElementById('itemModal').classList.remove('open'); }
+function saveItem(){
+  var id = document.getElementById('itId').value;
+  var nm = document.getElementById('itName').value.trim();
+  if(!nm){ toast('Item ka naam daalo'); return; }
+  var vals = { name:nm, unit:document.getElementById('itUnit').value.trim()||'pc',
+    rate:parseFloat(document.getElementById('itRate').value)||0,
+    open:parseFloat(document.getElementById('itOpen').value)||0,
+    low:parseFloat(document.getElementById('itLow').value)||0 };
+  if(id){ var it = itemById(id); for(var k in vals) it[k] = vals[k]; }
+  else { DB.items.push({ id:uid(), name:vals.name, unit:vals.unit, rate:vals.rate, open:vals.open, low:vals.low }); fillItemSelect(); }
+  save(); closeItem(); render(); toast('Item save ho gaya ✅');
+}
+
+/* ---------- HISAB ---------- */
+function renderHisab(){
+  var p = plCalc(curMonth);
+  var rows = [
+    ['Total Sale', p.sales, ''],
+    ['Opening Stock Value', p.openVal, 'sub'],
+    ['+ Stock Khareed', p.stockBuy, 'sub'],
+    ['− Closing Stock Value', -p.closeVal, 'sub'],
+    ['= COGS — Stock wala hissa', p.cogsStock, ''],
+    ['+ Fresh Kharcha', p.fresh, 'sub'],
+    ['+ Wastage', p.wasteAmt, 'sub'],
+    ['Total COGS', p.cogs, ''],
+    ['Gross Profit', p.gross, ''],
+    ['− Operating Kharcha', -p.op, 'sub'],
+    ['NET PROFIT' + (p.isTrue ? ' (ASLI)' : ' — closing stock baki hai'), p.net, 'total'],
+    ['Cash Profit (simple hisab)', p.cashProfit, '']
+  ];
+  if (PARTNER()) {
+    rows.push(['Abhinash ka hissa 50%', Math.max(p.net,0)/2, '']);
+    rows.push(['Partner ka hissa 50%', Math.max(p.net,0)/2, '']);
+  } else {
+    rows.push(['Abhinash ka Profit (100%)', Math.max(p.net,0), '']);
+  }
+  document.getElementById('plBody').innerHTML = rows.map(function(r){
+    return '<div class="pl '+(r[2]==='total'?'total':(r[2]==='sub'?'sub':''))+'"><span class="k">'+r[0]+'</span><span class="v '+(r[1]<0?'neg':'')+'">'+inr(r[1])+'</span></div>';
+  }).join('') + (p.isTrue ? '' : '<p class="note" style="margin-top:10px">⚠️ Is mahine ka <b>Closing Stock</b> abhi nahi bhara — Net Profit hisab-wale stock par hai. Stock tab me closing bharte hi ye pakka asli profit ban jayega.</p>');
+
+  document.getElementById('weekNote').textContent = PARTNER()
+    ? 'Partner ke saath hisab: hafta khatam hone par profit ka 50% share, SETTLE dabakar entry kar do. Week ka hisab cash method par hai.'
+    : 'Har hafte ka saaf hisab — sale, kharcha aur profit. Week ka hisab cash method par hai.';
+  var wl = document.getElementById('weekList');
+  wl.innerHTML = weeksOfMonth(curMonth).map(function(w){
+    var c = weekCalc(w);
+    if (PARTNER()) {
+      var bal = c.share - c.settled;
+      return '<div class="row"><div class="mid"><div class="a" style="font-size:14px">' + fmtDate(w.start) + ' – ' + fmtDate(w.end) + '</div>' +
+        '<div class="b">Sale ' + inr(c.sales) + ' • Kharcha ' + inr(c.out) + ' • Profit ' + inr(c.profit) + '<br>Partner share ' + inr(c.share) + (c.settled ? ' • Settled ' + inr(c.settled) : '') + (bal > 0 ? ' • <b style="color:#B3402E">Balance ' + inr(bal) + '</b>' : (c.share > 0 ? ' • <b style="color:#1E6B45">Settled ✅</b>' : '')) + '</div></div>' +
+        (bal > 0 ? '<button class="del" style="color:#14532D;font-size:12.5px;font-weight:700;border:1.5px solid #14532D;border-radius:10px;padding:7px 10px" onclick="settleWeek(\'' + w.start + '\',' + bal + ')">SETTLE</button>' : '') +
+        '</div>';
+    }
+    return '<div class="row"><div class="mid"><div class="a" style="font-size:14px">' + fmtDate(w.start) + ' – ' + fmtDate(w.end) + '</div>' +
+      '<div class="b">Sale ' + inr(c.sales) + ' • Kharcha ' + inr(c.out) + '</div></div>' +
+      '<div class="amt ' + (c.profit < 0 ? 'neg' : '') + '">' + inr(c.profit) + '</div></div>';
+  }).join('');
+  var su = document.getElementById('syncUrl');
+  if(su && !su.value) su.value = (DB.settings && DB.settings.syncUrl) || SYNC_URL_DEFAULT;
+}
+function settleWeek(weekStart, bal){
+  var amt = prompt('Kitna settle hua? (₹)', bal);
+  if(amt === null) return;
+  amt = parseFloat(amt); if(!amt) return;
+  DB.settlements.push({ id:uid(), week:weekStart, amount:amt, date:dstrOf(new Date()) });
+  save(); render(); toast('Settlement save ho gaya ✅');
+}
+
+/* ---------- SHEET SYNC ---------- */
+function syncUrl(){
+  var v = (document.getElementById('syncUrl').value || '').trim();
+  if(v && v !== '__SYNC_URL__'){ DB.settings = DB.settings || {}; DB.settings.syncUrl = v; save(); return v; }
+  if(DB.settings && DB.settings.syncUrl) return DB.settings.syncUrl;
+  return (SYNC_URL_DEFAULT !== '__SYNC_URL__') ? SYNC_URL_DEFAULT : '';
+}
+function buildPayload(){
+  var sales = DB.sales.slice().sort(function(a,b){ return a.date<b.date?-1:1; })
+    .map(function(s){ return { date:s.date, amount:+s.amount, note:s.note||'' }; });
+  var costs = DB.costs.slice().sort(function(a,b){ return a.date<b.date?-1:1; })
+    .map(function(c){
+      var it = c.itemId ? itemById(c.itemId) : null;
+      var label = it ? it.name : (c.kind === 'op' ? (c.cat || c.name || '') : (c.name || ''));  // sheet ke Stock SUMIFS ke liye plain item naam
+      return { date:c.date, kind:c.kind, kindLabel:SHEETLBL[c.kind], label:label, qty:(c.qty === undefined ? '' : c.qty), amount:+c.amount, note:c.note||'' };
+    });
+  var items = DB.items.map(function(it){ return { id:it.id, name:it.name, unit:it.unit, rate:it.rate, open:it.open }; });
+  var closings = {};
+  var cl = DB.closings[curMonth] || {};
+  DB.items.forEach(function(it){ if(cl[it.id] !== undefined && cl[it.id] !== '') closings[it.id] = cl[it.id]; });
+  return { sales:sales, costs:costs, items:items, closings:closings, settlements:DB.settlements || [], meta:{ updatedAt:(DB.meta && DB.meta.updatedAt) || 0 } };
+}
+function syncNow(){
+  var url = syncUrl();
+  var st = document.getElementById('syncStatus');
+  if(!url){ st.textContent = '⚠️ Sync link set nahi hai — pehle link daalo ya Ayan se pucho.'; return; }
+  st.textContent = '⏳ Sheet update ho raha hai…';
+  fetch(url, { method:'POST', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(buildPayload()) })
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      var ok = t.indexOf('"ok":true') >= 0 || t.indexOf('"ok": true') >= 0;
+      st.textContent = ok ? '✅ Sheet update ho gaya — ' + new Date().toLocaleTimeString() : '⚠️ Jawab ajeeb aaya: ' + t.slice(0,80);
+      if(ok) toast('Google Sheet update ✅');
+    })
+    .catch(function(e){ st.textContent = '❌ Sync fail — internet check karo, phir try karo.'; });
+}
+function openSheet(){ window.open(SHEET_URL, '_blank'); }
+
+/* ---------- AUTO UPDATE (sheet se data + naya design) ---------- */
+function applyPull(res){
+  var lowByName = {};
+  DB.items.forEach(function(it){ lowByName[it.name] = it.low || 0; });
+  var keepUrl = (DB.settings && DB.settings.syncUrl) || '';
+  DB = res.db;
+  DB.meta = { updatedAt: (res.meta && res.meta.updatedAt) || 0 };
+  DB.settings = { syncUrl: keepUrl, partner: !!(res.config && res.config.partner) };
+  DB.items.forEach(function(it){ if (lowByName[it.name]) it.low = lowByName[it.name]; });
+  if (!DB.closings) DB.closings = {};
+  if (!DB.settlements) DB.settlements = [];
+  try{ Store.set(JSON.stringify(DB)); }catch(e){}
+  closeOverlays(); fillItemSelect(); render();
+}
+function cloudPull(manual){
+  var url = syncUrl();
+  var st = document.getElementById('syncStatus');
+  if(!url){ if(manual) toast('Sync link set nahi hai'); return; }
+  fetch(url + (url.indexOf('?') >= 0 ? '&' : '?') + 'data=1')
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if(!res || !res.ok || !res.db) throw 0;
+      var cloudUpd = (res.meta && res.meta.updatedAt) || 0;
+      var localUpd = (DB.meta && DB.meta.updatedAt) || 0;
+      var partnerChanged = (!!(res.config && res.config.partner)) !== PARTNER();
+      if (cloudUpd > localUpd || partnerChanged) {
+        applyPull(res);
+        toast('✅ Naya data aa gaya — app update ho gaya');
+        if(st) st.textContent = 'Sheet se latest data aa gaya — ' + new Date().toLocaleTimeString();
+      } else if (manual) {
+        toast('Sheet ka data hi latest hai 👍');
+        if(st) st.textContent = 'Data already latest hai — koi change nahi.';
+      }
+    })
+    .catch(function(e){ if(manual) toast('Net nahi mila — baad me try karo'); });
+}
+function checkRemoteVersion(){
+  fetch(REMOTE_BASE + 'v.txt?ts=' + Date.now())
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      var rv = parseInt(t, 10);
+      if (rv && rv > APP_VERSION) location.replace(REMOTE_BASE + 'index.html?v=' + rv);
+    })
+    .catch(function(e){});
+}
+
+/* ---------- REPORT / BACKUP ---------- */
+function shareReport(){
+  var p = plCalc(curMonth);
+  var lines = [
+    '☕ *BEAN BUZZ — ' + monthLabel(curMonth) + ' Hisab*',
+    'Total Sale: ' + inr(p.sales),
+    'COGS (maal ki cost): ' + inr(p.cogs),
+    'Gross Profit: ' + inr(p.gross),
+    'Operating Kharcha: ' + inr(p.op),
+    (PARTNER() ? '*Net Profit: ' + inr(p.net) + '*\nAbhinash (50%): ' + inr(Math.max(p.net,0)/2) + '\nPartner (50%): ' + inr(Math.max(p.net,0)/2) : '*Net Profit (pura Abhinash ka): ' + inr(p.net) + '*'),
+    p.isTrue ? '(Closing stock ke saath pakka hisab)' : '(Note: closing stock baki hai)'
+  ];
+  window.open('https://wa.me/?text=' + encodeURIComponent(lines.join('\n')), '_blank');
+}
+function exportData(){
+  var txt = JSON.stringify(DB);
+  var box = document.getElementById('importBox');
+  box.value = txt; box.select();
+  if(navigator.clipboard) navigator.clipboard.writeText(txt);
+  toast('Backup copy ho gaya 📋');
+}
+function importData(){
+  try{
+    var d = JSON.parse(document.getElementById('importBox').value);
+    if(!d.items || !d.sales || !d.costs) throw 0;
+    DB = d; save(); fillItemSelect(); render(); toast('Backup restore ho gaya ✅');
+  }catch(e){ toast('Backup sahi nahi hai ❌'); }
+}
+
+/* ---------- INIT ---------- */
+load();
+if(!DB.settings) DB.settings = {};
+var todayStr = dstrOf(new Date());
+document.getElementById('saleDate').value = todayStr;
+document.getElementById('costDate').value = todayStr;
+document.getElementById('costCat').addEventListener('change', function(){
+  if(costKind==='op') document.getElementById('costName').value = this.value;
+});
+var dn = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var now = new Date();
+document.getElementById('todayBox').innerHTML = '<b>' + dn[now.getDay()] + '</b><br>' + now.getDate() + ' ' + mn[now.getMonth()] + ' ' + now.getFullYear();
+fillItemSelect();
+setKind('stock');
+render();
+cloudPull(false);
+checkRemoteVersion();
+</script>
+
+</body>
+</html>
