@@ -309,7 +309,7 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
 /* ================= CORE: DATA + HISAB LOGIC ================= */
 var FIRST_MONTH = '2026-11'; // opening stock counted on 01 Nov 2026
 var LS_KEY = 'beanbuzz_tracker_v2';
-var APP_VERSION = 5;
+var APP_VERSION = 6;
 var REMOTE_BASE = 'https://higgsfieldaiofficial-netizen.github.io/beanbuzz-tracker/';
 var Store = {
   get: function(){ try{ if (window.AndroidStore) { var v = AndroidStore.read(LS_KEY); if (v) return v; } }catch(e){} try{ return localStorage.getItem(LS_KEY); }catch(e){ return null; } },
@@ -443,7 +443,7 @@ var SEED_COSTS = [
  ['2026-11-07','stock','cornflour','',5000,333,'Cornflour 5kg @66'],
  ['2026-11-07','stock','refine','',6000,990,'Refine 750ml x 8'],
  ['2026-11-07','stock','momo','',300,1800,'C Momo 300 x 6'],
- ['2026-11-07','op',null,'Disposal / Safai',0,305,'Disposal'],
+ ['2026-11-07','op',null,'Disposal / Safai',0,395,'Disposal'],
  ['2026-11-07','op',null,'Rapido / Delivery',0,110,'Rapido'],
  ['2026-11-07','fresh',null,'Chicken',0,250,''],
  ['2026-11-07','fresh',null,'Tomato',0,20,''],
@@ -604,7 +604,6 @@ var curMonth = FIRST_MONTH;
 var costKind = 'stock';
 var costFilter = 'all';
 var KINDLBL = { stock:'Stock', fresh:'Fresh', op:'Operating', waste:'Wastage' };
-var SHEETLBL = { stock:'Stock Purchase', fresh:'Fresh (roz ka)', op:'Operating', waste:'Wastage' };
 var KINDICON = { stock:'📦', fresh:'🥬', op:'🧾', waste:'🗑' };
 
 function toast(msg){
@@ -902,7 +901,7 @@ function buildPayload(){
     .map(function(c){
       var it = c.itemId ? itemById(c.itemId) : null;
       var label = it ? it.name : (c.kind === 'op' ? (c.cat || c.name || '') : (c.name || ''));  // sheet ke Stock SUMIFS ke liye plain item naam
-      return { date:c.date, kind:c.kind, kindLabel:SHEETLBL[c.kind], label:label, qty:(c.qty === undefined ? '' : c.qty), amount:+c.amount, note:c.note||'' };
+      return { date:c.date, kind:c.kind, kindLabel:KINDLBL[c.kind], label:label, qty:(c.qty === undefined ? '' : c.qty), amount:+c.amount, note:c.note||'' };
     });
   var items = DB.items.map(function(it){ return { id:it.id, name:it.name, unit:it.unit, rate:it.rate, open:it.open }; });
   var closings = {};
