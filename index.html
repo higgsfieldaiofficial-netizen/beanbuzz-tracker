@@ -1,1367 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Bean Buzz — Stall Tracker</title>
+<html lang="hi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bean Buzz — Business Management</title>
 <style>
-:root{
-  --cream:#F7F1E2; --paper:#FFFDF5; --card:#FFFFFF;
-  --green:#0C3B2E; --green2:#14532D; --green3:#1E6B45;
-  --gold:#C2A059; --gold2:#A8823D; --goldsoft:#EFE3C2;
-  --ink:#243528; --mut:#7C7666; --line:#E7DFC9;
-  --red:#B3402E; --redsoft:#F9E8E2;
-  --shadow:0 6px 22px rgba(12,59,46,.10);
-  --r:18px;
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{scroll-behavior:smooth}
-body{font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--cream);color:var(--ink);padding-bottom:92px;font-size:15px}
-h1,h2,.serif{font-family:Georgia,"Times New Roman",serif}
-button{font-family:inherit;cursor:pointer;border:none;background:none}
-input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
-::-webkit-scrollbar{width:0;height:0}
-
-/* ---------- header ---------- */
-.topbar{position:sticky;top:0;z-index:40;background:linear-gradient(180deg,#FBF7EA,#F7F1E2);padding:10px 16px 8px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
-.topbar img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);background:#fff}
-.topbar .t1{font-family:Georgia,serif;font-size:19px;letter-spacing:2.5px;color:var(--green);font-weight:700;line-height:1}
-.topbar .t2{font-size:9.5px;letter-spacing:2.6px;color:var(--gold2);font-weight:700;margin-top:3px}
-.topbar .today{margin-left:auto;text-align:right;font-size:11px;color:var(--mut);line-height:1.5}
-.topbar .today b{color:var(--green);font-size:12.5px}
-
-/* ---------- layout ---------- */
-.wrap{max-width:560px;margin:0 auto;padding:14px 14px 6px}
-.page{display:none}
-.page.active{display:block;animation:fade .18s ease}
-@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
-.card h3{font-size:13px;letter-spacing:1.6px;color:var(--green);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.card h3 .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);display:inline-block}
-
-/* month switcher */
-.mswitch{display:flex;align-items:center;justify-content:space-between;background:var(--green);border-radius:14px;padding:9px 8px;margin-bottom:14px;box-shadow:var(--shadow)}
-.mswitch button{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.12);color:#F3E9CF;font-size:19px;line-height:1}
-.mswitch .mlab{text-align:center}
-.mswitch .mlab .m{font-family:Georgia,serif;font-size:18px;color:#FBF4DC;letter-spacing:1px}
-.mswitch .mlab .s{font-size:10px;color:#CDBB8A;letter-spacing:2px;margin-top:2px}
-
-/* hero */
-.hero{background:radial-gradient(120% 150% at 85% -20%,#1E6B45 0%,var(--green) 55%);border-radius:22px;padding:20px 18px 16px;color:#F5EDD6;box-shadow:0 12px 28px rgba(12,59,46,.28);margin-bottom:14px;position:relative;overflow:hidden}
-.hero:after{content:"";position:absolute;right:-38px;top:-38px;width:150px;height:150px;border-radius:50%;border:22px solid rgba(194,160,89,.20)}
-.hero .brand{display:flex;align-items:center;gap:11px;position:relative;z-index:1}
-.hero .brand img{width:52px;height:52px;border-radius:50%;border:2px solid var(--gold);object-fit:cover;background:#fff}
-.hero .brand .b1{font-family:Georgia,serif;font-size:20px;letter-spacing:2px;font-weight:700}
-.hero .brand .b2{font-size:9px;letter-spacing:2.8px;color:#D9C48C;font-weight:700;margin-top:3px}
-.hero .plabel{margin-top:16px;font-size:10.5px;letter-spacing:2.2px;color:#CDBB8A;font-weight:700;position:relative;z-index:1}
-.hero .pbig{font-family:Georgia,serif;font-size:40px;font-weight:700;color:#FFF7DE;line-height:1.08;position:relative;z-index:1}
-.hero .psub{font-size:12px;color:#D8CBA3;position:relative;z-index:1;margin-top:2px}
-.hero .split{display:flex;gap:10px;margin-top:14px;position:relative;z-index:1}
-.hero .split .sp{flex:1;background:rgba(255,255,255,.09);border:1px solid rgba(194,160,89,.45);border-radius:14px;padding:10px 12px}
-.hero .split .sp .n{font-size:10px;letter-spacing:1.6px;color:#D9C48C;font-weight:700}
-.hero .split .sp .v{font-family:Georgia,serif;font-size:20px;color:#FFF3D0;margin-top:3px}
-
-/* stat grid */
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:13px 14px}
-.stat .k{font-size:10.5px;letter-spacing:1.4px;color:var(--mut);font-weight:700;text-transform:uppercase}
-.stat .v{font-family:Georgia,serif;font-size:23px;color:var(--green);margin-top:4px}
-.stat .v small{font-size:12px;color:var(--mut);font-family:inherit}
-.stat.gold .v{color:var(--gold2)}
-.stat.red .v{color:var(--red)}
-
-/* rows / lists */
-.row{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px dashed var(--line)}
-.row:last-child{border-bottom:none}
-.row .ic{width:38px;height:38px;border-radius:12px;background:var(--goldsoft);display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
-.row .ic.g{background:#E2EEE4}.row .ic.r{background:var(--redsoft)}
-.row .mid{flex:1;min-width:0}
-.row .mid .a{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .mid .b{font-size:11.5px;color:var(--mut);margin-top:1px}
-.row .amt{font-weight:700;font-size:15px;color:var(--green);white-space:nowrap}
-.row .amt.neg{color:var(--red)}
-.row .del{color:#C9BFA4;font-size:17px;padding:4px 2px;flex:none}
-.tag{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.6px;padding:2.5px 7px;border-radius:20px;vertical-align:2px}
-.tag.stock{background:#E2EEE4;color:var(--green2)}
-.tag.fresh{background:#FDF0D5;color:#8A6414}
-.tag.op{background:#EAE7F5;color:#4B3F8F}
-.tag.waste{background:var(--redsoft);color:var(--red)}
-.tag.sale{background:var(--goldsoft);color:var(--gold2)}
-.empty{padding:20px 8px;text-align:center;color:var(--mut);font-size:13.5px}
-.alert{background:#FBF3D9;border:1px solid #E4CE8E;border-radius:14px;padding:11px 13px;font-size:13px;margin-bottom:9px;display:flex;gap:9px;align-items:center}
-.alert b{color:#7A5B10}
-.note{font-size:12px;color:var(--mut);line-height:1.55}
-.note b{color:var(--green)}
-
-/* forms */
-.fcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
-.fcard h3{font-size:13px;letter-spacing:1.6px;color:var(--green);text-transform:uppercase;margin-bottom:12px}
-.frow{margin-bottom:11px}
-.frow label{display:block;font-size:11px;font-weight:700;letter-spacing:1.1px;color:var(--mut);text-transform:uppercase;margin-bottom:5px}
-.frow input,.frow select,.frow textarea{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:#FFFEF9;outline:none}
-.frow input:focus,.frow select:focus,.frow textarea:focus{border-color:var(--gold)}
-.f2{display:flex;gap:10px}.f2 .frow{flex:1}
-.seg{display:flex;background:#F1EAD3;border-radius:12px;padding:4px;gap:4px;margin-bottom:12px;flex-wrap:wrap}
-.seg button{flex:1;padding:9px 4px;border-radius:9px;font-size:12.5px;font-weight:700;color:var(--mut);white-space:nowrap}
-.seg button.on{background:var(--green);color:#F7EDCB;box-shadow:0 3px 8px rgba(12,59,46,.25)}
-.btn{display:block;width:100%;padding:14px;border-radius:14px;background:linear-gradient(180deg,var(--green2),var(--green));color:#F8F0D2;font-size:15.5px;font-weight:700;letter-spacing:.4px;box-shadow:0 8px 18px rgba(12,59,46,.25)}
-.btn:active{transform:scale(.985)}
-.btn.gold{background:linear-gradient(180deg,#D9B96A,var(--gold2));color:#2E2208}
-.btn.ghost{background:#fff;color:var(--green);border:1.5px solid var(--green);box-shadow:none}
-.btn.sm{padding:10px;font-size:13.5px}
-.autobox{background:#F4EEDA;border:1px dashed var(--gold);border-radius:12px;padding:10px 12px;font-size:13.5px;margin-bottom:11px;color:#6B5518}
-.autobox b{color:var(--green);font-size:16px}
-
-/* P&L table */
-.pl{display:flex;justify-content:space-between;padding:9px 2px;border-bottom:1px dashed var(--line);font-size:14.5px}
-.pl:last-child{border-bottom:none}
-.pl .v{font-weight:700;color:var(--green)}
-.pl.total{border-top:2px solid var(--gold);border-bottom:none;margin-top:4px;padding-top:12px;font-size:16px}
-.pl.total .v{color:var(--gold2);font-family:Georgia,serif;font-size:19px}
-.pl.sub .k{color:var(--mut);padding-left:14px;font-size:13.5px}
-.pl .v.neg{color:var(--red)}
-
-/* stock */
-.stockitem{padding:12px 2px;border-bottom:1px dashed var(--line)}
-.stockitem:last-child{border-bottom:none}
-.stockitem .l1{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.stockitem .nm{font-weight:600;font-size:14.5px}
-.stockitem .vl{font-weight:700;color:var(--green);white-space:nowrap}
-.stockitem .l2{display:flex;gap:12px;font-size:11.5px;color:var(--mut);margin-top:3px;flex-wrap:wrap}
-.lowb{background:var(--redsoft);color:var(--red);font-weight:700;padding:1px 7px;border-radius:12px;font-size:10px}
-.okb{background:#E2EEE4;color:var(--green2);font-weight:700;padding:1px 7px;border-radius:12px;font-size:10px}
-.progress{height:6px;background:#EFE8D2;border-radius:6px;margin-top:7px;overflow:hidden}
-.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--green3));border-radius:6px}
-.closein{width:96px;padding:8px;border:1.5px solid var(--line);border-radius:10px;text-align:center;background:#FFFEF9}
-
-/* bottom nav */
-.nav{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--green);box-shadow:0 -6px 20px rgba(12,59,46,.3);padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
-.nav .in{max-width:560px;margin:0 auto;display:flex}
-.nav button{flex:1;color:#B9AE8C;font-size:10.5px;font-weight:700;letter-spacing:.4px;padding:5px 0 3px;border-radius:12px}
-.nav button .e{display:block;font-size:20px;margin-bottom:2px;filter:grayscale(.4);opacity:.75}
-.nav button.on{color:#F6EBC4}
-.nav button.on .e{filter:none;opacity:1}
-.nav button.on{background:rgba(255,255,255,.08)}
-
-/* modal */
-.modal{position:fixed;inset:0;background:rgba(18,32,22,.55);z-index:80;display:none;align-items:flex-end;justify-content:center}
-.modal.open{display:flex}
-.sheet{background:var(--cream);width:100%;max-width:560px;max-height:88vh;overflow-y:auto;border-radius:22px 22px 0 0;padding:20px 16px 26px;animation:up .2s ease}
-@keyframes up{from{transform:translateY(26px)}to{transform:none}}
-.sheet h3{font-family:Georgia,serif;color:var(--green);font-size:19px;margin-bottom:14px}
-.toast{position:fixed;left:50%;bottom:104px;transform:translateX(-50%) translateY(20px);background:var(--green);color:#F6EBC4;padding:11px 20px;border-radius:30px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:99;box-shadow:0 10px 24px rgba(0,0,0,.25);white-space:nowrap}
-.toast.show{opacity:1;transform:translateX(-50%)}
-.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px}
-.chips button{flex:none;padding:7px 14px;border-radius:20px;background:#fff;border:1.5px solid var(--line);font-size:12.5px;font-weight:700;color:var(--mut)}
-.chips button.on{background:var(--green);color:#F6EBC4;border-color:var(--green)}
-.pl small{font-size:11px}
-#repChips{margin-bottom:10px}
-.openin{border-color:var(--gold)!important;background:#FFFBEF!important}
-.histchg{font-size:11px;font-weight:700}
-</style>
-</head>
-<body>
-
-<div class="topbar">
-  <img src="logo.jpg" alt="Bean Buzz">
-  <div><div class="t1">BEAN BUZZ</div><div class="t2">STALL TRACKER</div></div>
-  <div class="today" id="todayBox"></div>
-</div>
-
-<div class="wrap">
-
-  <!-- ================= HOME ================= -->
-  <section class="page active" id="pg-home">
-    <div class="mswitch">
-      <button onclick="shiftMonth(-1)">‹</button>
-      <div class="mlab"><div class="m" id="mLabHome">November 2026</div><div class="s">MONTH HISAB</div></div>
-      <button onclick="shiftMonth(1)">›</button>
-    </div>
-    <div class="hero">
-      <div class="brand"><img src="logo.jpg" alt=""><div><div class="b1">BEAN BUZZ</div><div class="b2">PREMIUM COFFEE • ESTD 2026</div></div></div>
-      <div class="plabel" id="heroLabel">NET PROFIT (ASLI)</div>
-      <div class="pbig" id="heroProfit">₹0</div>
-      <div class="psub" id="heroSub"></div>
-      <div class="split" id="heroSplit"></div>
-    </div>
-    <div class="grid" id="statGrid"></div>
-    <div class="card"><h3><span class="dot"></span>Aaj Ka Hisab — <span id="todayLab"></span></h3><div class="grid" id="todayGrid" style="margin-bottom:0"></div></div>
-    <div class="card"><h3><span class="dot"></span>Shop Ka Paisa — Balance</h3><div class="grid" id="walletGrid" style="margin-bottom:8px"></div><p class="note" id="walletNote"></p></div>
-    <div id="lowAlerts"></div>
-    <div class="card"><h3><span class="dot"></span>Recent Entries</h3><div id="recentList"></div></div>
-    <div class="card"><h3><span class="dot"></span>Hisab Logic</h3>
-      <p class="note"><b>COGS</b> = Opening Stock + Stock Khareed − Closing Stock. <b>Gross Profit</b> = Sale − COGS − Fresh kharcha − Wastage. <b>Net Profit</b> = Gross − Operating kharcha (Rapido, gas, staff…). <span id="partnerLine">Pura Net Profit <b>Abhinash ka</b> hai — abhi koi partner nahi hai.</span> Mahine ke end me <b>Stock tab me Closing Stock</b> daalte hi asli profit pakka ho jata hai — usse pehle dashboard cash hisab dikhata hai.</p>
-    </div>
-  </section>
-
-  <!-- ================= SALE ================= -->
-  <section class="page" id="pg-sale">
-    <div class="fcard"><h3>＋ Aaj Ka Sale Daalo</h3>
-      <div class="f2">
-        <div class="frow"><label>Date</label><input type="date" id="saleDate"></div>
-        <div class="frow"><label>Cash Sale (₹)</label><input type="number" inputmode="numeric" id="saleCash" placeholder="0" oninput="saleTotal()"></div>
-      </div>
-      <div class="f2">
-        <div class="frow"><label>Online Sale (₹)</label><input type="number" inputmode="numeric" id="saleOnline" placeholder="0" oninput="saleTotal()"></div>
-        <div class="frow"><label>Note (optional)</label><input type="text" id="saleNote" placeholder="e.g. Sunday rush"></div>
-      </div>
-      <div class="autobox" id="saleTotalBox">Total Sale: <b>₹0</b> = Cash + Online</div>
-      <input type="hidden" id="saleEditId">
-      <button class="btn" id="saleBtn" onclick="addSale()">Sale Save Karo</button>
-      <p class="note" style="margin-top:8px">Purani date ki sale bhi date badal ke daal sakte ho. Sale badalni ho to neeche list me ✎ dabao. Sirf total pata hai to pura Cash me daal do.</p>
-    </div>
-    <div class="card"><h3><span class="dot"></span><span id="saleListTitle">Sales</span></h3><div id="saleList"></div></div>
-  </section>
-
-  <!-- ================= KHARCHA ================= -->
-  <section class="page" id="pg-cost">
-    <div class="fcard"><h3>＋ Kharcha / Khareed Daalo</h3>
-      <div class="seg" id="kindSeg">
-        <button data-k="stock" class="on" onclick="setKind('stock')">📦 Stock Khareed</button>
-        <button data-k="fresh" onclick="setKind('fresh')">🥬 Fresh (Roz ka)</button>
-        <button data-k="op" onclick="setKind('op')">🧾 Operating</button>
-        <button data-k="waste" onclick="setKind('waste')">🗑 Wastage</button>
-      </div>
-      <div class="frow" id="itemRow"><label>Item</label><select id="costItem" onchange="document.getElementById('costRate').value='';costAuto()"></select></div>
-      <div class="frow" id="nameRow" style="display:none"><label id="nameLab">Naam</label><input type="text" id="costName" placeholder="e.g. Chicken, Piaj, Tomato"></div>
-      <div class="frow" id="catRow" style="display:none"><label>Category</label>
-        <select id="costCat"><option>Rapido / Delivery</option><option>Gas / Fuel</option><option>Staff</option><option>Menu / Printing</option><option>Bag / Extra Packing</option><option>Disposal / Safai</option><option>Licence / Fees</option><option>Other</option></select></div>
-      <div class="f2">
-        <div class="frow" id="qtyRow"><label>Quantity</label><input type="number" inputmode="decimal" id="costQty" placeholder="0" oninput="costAuto()"></div>
-        <div class="frow"><label>Amount (₹)</label><input type="number" inputmode="decimal" id="costAmt" placeholder="0"></div>
-      </div>
-      <div class="autobox" id="autoBox" style="display:none"></div>
-      <div class="f2">
-        <div class="frow"><label>Payment Mode</label><select id="costPay"><option value="cash">💵 Cash</option><option value="online">📱 Online</option></select></div>
-        <div class="frow"><label>Rate / Price (₹ per unit)</label><input type="number" inputmode="decimal" id="costRate" placeholder="auto (item rate)" oninput="costAuto()"></div>
-      </div>
-      <p class="note" style="margin-bottom:10px">Stock Khareed = Purchase entry hai — isse stock badhega, price history update hogi aur balance se paisa katega. Alag se expense dobara mat daalna (double counting nahi hogi).</p>
-      <div class="f2">
-        <div class="frow"><label>Date</label><input type="date" id="costDate"></div>
-        <div class="frow"><label>Note (optional)</label><input type="text" id="costNote" placeholder=""></div>
-      </div>
-      <input type="hidden" id="costEditId"><button class="btn" id="costBtn" onclick="addCost()">Kharcha Save Karo</button>
-    </div>
-    <div class="chips" id="costChips">
-      <button data-f="all" class="on" onclick="setCostFilter('all')">Sab</button>
-      <button data-f="stock" onclick="setCostFilter('stock')">Stock</button>
-      <button data-f="fresh" onclick="setCostFilter('fresh')">Fresh</button>
-      <button data-f="op" onclick="setCostFilter('op')">Operating</button>
-      <button data-f="waste" onclick="setCostFilter('waste')">Wastage</button>
-    </div>
-    <div class="card"><h3><span class="dot"></span><span id="costListTitle">Kharcha</span></h3><div id="costList"></div></div>
-  </section>
-
-  <!-- ================= STOCK ================= -->
-  <section class="page" id="pg-stock">
-    <div class="card"><h3><span class="dot"></span>🔍 Search — Item / Kharcha / Date</h3>
-      <div class="frow"><input type="text" id="searchBox" placeholder="e.g. Milk, Oreo, Maggie, Chicken, 2026-11-07…" oninput="renderSearch()"></div>
-      <div id="searchRes"><p class="note">Item ka naam likhte hi uska latest rate, purane rates (price history) aur khareed ki details dikhengi. Purani price kabhi delete/overwrite nahi hoti.</p></div>
-    </div>
-    <div class="card"><h3><span class="dot"></span>Stock — <span id="stockMonthLab"></span></h3>
-      <p class="note" style="margin-bottom:8px">Stock = Opening + Khareed − Wastage. Kisi item pe tap karke rate / opening / low-alert badal sakte ho.</p>
-      <div id="stockList"></div>
-      <button class="btn ghost sm" style="margin-top:12px" onclick="openItem()">＋ Naya Item Jodo</button>
-    </div>
-    <div class="card"><h3><span class="dot"></span>Month-End Closing Stock</h3>
-      <p class="note" style="margin-bottom:10px">Mahine ke last din jo maal asal me bacha hai wo gin ke daalo — tabhi <b>asli (COGS) profit</b> pakka hoga. Khali chhoda = app wahi stock manega jo hisab se bacha hai.</p>
-      <div id="closingList"></div>
-      <button class="btn gold" style="margin-top:12px" onclick="saveClosing()">Closing Stock Save Karo</button>
-    </div>
-    <div class="card"><h3><span class="dot"></span>Month-Start Opening Stock — <span id="openMonthLab"></span></h3>
-      <p class="note" style="margin-bottom:10px">Har mahine ki shuruaat ka stock. Normal case me pichhle mahine ka Closing Stock hi apne aap Opening ban jata hai — sirf galti sudharni ho to yahan box me sahi qty daalo (khali = auto).</p>
-      <div id="openingList"></div>
-      <button class="btn ghost sm" style="margin-top:12px" onclick="saveOpening()">Opening Stock Save Karo</button>
-    </div>
-  </section>
-
-  <!-- ================= HISAB ================= -->
-  <section class="page" id="pg-hisab">
-    <div class="mswitch">
-      <button onclick="shiftMonth(-1)">‹</button>
-      <div class="mlab"><div class="m" id="mLabHisab">November 2026</div><div class="s">P&amp;L STATEMENT</div></div>
-      <button onclick="shiftMonth(1)">›</button>
-    </div>
-    <div class="card"><h3><span class="dot"></span>Monthly Profit &amp; Loss</h3><div id="plBody"></div></div>
-    <div class="card"><h3><span class="dot"></span>Weekly Hisab (Mon–Sun)</h3>
-      <p class="note" id="weekNote" style="margin-bottom:8px">Har hafte ka saaf hisab — sale, kharcha aur profit. Week ka hisab cash method par hai.</p>
-      <div id="weekList"></div>
-    </div>
-        <div class="card"><h3><span class="dot"></span>🏦 Daily Savings — Bachat</h3>
-      <p class="note" style="margin-bottom:10px">Savings na kharcha hai, na profit. Cash/Online se savings me paisa gaya to wahan ka balance kam hoga aur savings badhegi — Total Shop Money me double counting nahi hogi.</p>
-      <div class="grid" id="savGrid" style="margin-bottom:10px"></div>
-      <div class="f2">
-        <div class="frow"><label>Date</label><input type="date" id="savDate"></div>
-        <div class="frow"><label>Amount (₹)</label><input type="number" inputmode="numeric" id="savAmt" placeholder="0"></div>
-      </div>
-      <div class="f2">
-        <div class="frow"><label>Kahan Se</label><select id="savMode"><option value="cash">💵 Cash se</option><option value="online">📱 Online se</option></select></div>
-        <div class="frow"><label>Type</label><select id="savType"><option value="add">➕ Savings me Daala</option><option value="out">➖ Savings se Nikala (shop me wapas)</option></select></div>
-      </div>
-      <div class="frow"><label>Note (optional)</label><input type="text" id="savNote" placeholder=""></div>
-      <button class="btn sm" onclick="addSaving()">Savings Save Karo</button>
-      <div id="savList" style="margin-top:8px"></div>
-    </div>
-    <div class="card"><h3><span class="dot"></span>💼 Cash / Online Balance Set Karo</h3>
-      <p class="note" style="margin-bottom:10px">Balance formula: <b>Opening + Sales − Kharcha/Purchase − Savings transfer + Adjustment</b>. Galla ya bank balance se match na ho to Adjustment se theek karo.</p>
-      <div class="f2">
-        <div class="frow"><label>Opening Cash (₹)</label><input type="number" inputmode="decimal" id="walOpenCash"></div>
-        <div class="frow"><label>Opening Online (₹)</label><input type="number" inputmode="decimal" id="walOpenOnline"></div>
-      </div>
-      <button class="btn ghost sm" onclick="saveWalletOpen()">Opening Balance Save Karo</button>
-      <div class="f2" style="margin-top:12px">
-        <div class="frow"><label>Adjustment (₹, + ya −)</label><input type="number" inputmode="decimal" id="adjAmt" placeholder="e.g. 200 ya -150"></div>
-        <div class="frow"><label>Mode</label><select id="adjMode"><option value="cash">💵 Cash</option><option value="online">📱 Online</option></select></div>
-      </div>
-      <div class="frow"><label>Adjustment Note</label><input type="text" id="adjNote" placeholder="e.g. Galla gin ke theek kiya"></div>
-      <button class="btn ghost sm" onclick="addAdjustment()">Adjustment Save Karo</button>
-      <div id="adjList" style="margin-top:8px"></div>
-    </div>
-    <div class="card"><h3><span class="dot"></span>📑 Reports — <span id="repMonthLab"></span></h3>
-      <div class="chips" id="repChips">
-        <button data-r="pl" class="on" onclick="setReport('pl')">Profit/Loss</button>
-        <button data-r="sale" onclick="setReport('sale')">Daily Sale</button>
-        <button data-r="expense" onclick="setReport('expense')">Kharcha</button>
-        <button data-r="purchase" onclick="setReport('purchase')">Purchase</button>
-        <button data-r="price" onclick="setReport('price')">Price History</button>
-        <button data-r="opening" onclick="setReport('opening')">Opening Stock</button>
-        <button data-r="closing" onclick="setReport('closing')">Closing Stock</button>
-        <button data-r="cash" onclick="setReport('cash')">Cash Balance</button>
-        <button data-r="online" onclick="setReport('online')">Online Balance</button>
-        <button data-r="savings" onclick="setReport('savings')">Savings</button>
-      </div>
-      <div id="repBody"></div>
-      <button class="btn gold sm" style="margin-top:12px" onclick="downloadCSV()">⬇ Excel (CSV) Download — Poora Data</button>
-      <p class="note" style="margin-top:8px">Purane mahine/saal dekhne ke liye upar se month badlo — purana data kabhi delete nahi hota. PDF chahiye to report khol ke Share/Print se PDF ban jata hai.</p>
-    </div>
-    <div class="card"><h3><span class="dot"></span>🔒 App Lock — PIN</h3>
-      <p class="note" style="margin-bottom:10px">PIN lagane par app khulte hi PIN manga jayega. Abhi <b id="pinState">PIN OFF hai</b>.</p>
-      <div class="frow"><label>Naya PIN (4–6 digit)</label><input type="password" inputmode="numeric" id="pinNew" maxlength="6"></div>
-      <button class="btn ghost sm" onclick="setPin()">PIN Set / Badlo</button>
-      <button class="btn ghost sm" style="margin-top:8px" onclick="removePin()">PIN Hatado</button>
-    </div>
-<div class="card"><h3><span class="dot"></span>Google Sheet Sync</h3>
-      <p class="note" style="margin-bottom:10px"><b>Sheet hi master hai</b> — app khulte hi Sheet ka latest data apne aap aa jata hai, kuch update karne ki zaroorat nahi. App me entry karne ke baad Sync dabao to Sheet bhi update ho jayegi.</p>
-      <button class="btn sm" onclick="syncNow()">🔄 Sheet Update Karo (Sync)</button>
-      <button class="btn alt sm" style="margin-top:9px" onclick="cloudPull(true)">⬇ Sheet Se Latest Data Lao</button>
-      <p class="note" id="syncStatus" style="margin-top:9px"></p>
-      <button class="btn ghost sm" style="margin-top:6px" onclick="openSheet()">📄 Google Sheet Kholo</button>
-      <div class="frow" style="margin-top:12px"><label>Sync Link (Apps Script URL)</label><input type="text" id="syncUrl" placeholder="https://script.google.com/macros/s/…/exec"></div>
-    </div>
-    <div class="card"><h3><span class="dot"></span>Report / Backup</h3>
-      <button class="btn sm" onclick="shareReport()">📲 Hisab Report WhatsApp Par Bhejo</button>
-      <button class="btn ghost sm" style="margin-top:10px" onclick="exportData()">⬇ Backup Copy Karo (JSON)</button>
-      <div class="frow" style="margin-top:12px"><label>Backup Wapas Daalo (paste)</label><textarea id="importBox" rows="3" placeholder="Purana backup yahan paste karo"></textarea></div>
-      <button class="btn ghost sm" onclick="importData()">⬆ Backup Restore Karo</button>
-    </div>
-  </section>
-</div>
-
-<!-- item modal -->
-<div class="modal" id="itemModal"><div class="sheet">
-  <h3 id="itemModalTitle">Item</h3>
-  <input type="hidden" id="itId">
-  <div class="frow"><label>Item ka Naam</label><input type="text" id="itName"></div>
-  <div class="frow"><label>Category</label><input type="text" id="itCat" placeholder="e.g. Grocery, Dairy, Packing, Vegetables"></div>
-  <div id="itHistory"></div>
-  <div class="f2">
-    <div class="frow"><label>Unit</label><input type="text" id="itUnit" placeholder="pc / gm / packet / bottle"></div>
-    <div class="frow"><label>Rate (₹ per unit)</label><input type="number" inputmode="decimal" id="itRate"></div>
-  </div>
-  <div class="f2">
-    <div class="frow"><label>Opening Qty (1 Nov)</label><input type="number" inputmode="decimal" id="itOpen"></div>
-    <div class="frow"><label>Low Stock Alert (qty)</label><input type="number" inputmode="decimal" id="itLow"></div>
-  </div>
-  <button class="btn" onclick="saveItem()">Save Karo</button>
-  <button class="btn ghost" style="margin-top:10px" onclick="closeItem()">Cancel</button>
-</div></div>
-
-<div class="modal" id="pinModal"><div class="sheet" style="text-align:center">
-  <h3>🔒 Bean Buzz Locked</h3>
-  <p class="note">App kholne ke liye PIN daalo</p>
-  <div class="frow" style="margin-top:14px"><input type="password" inputmode="numeric" id="pinTry" maxlength="6" style="text-align:center;font-size:22px;letter-spacing:6px"></div>
-  <button class="btn" onclick="tryPin()">App Kholo</button>
-</div></div>
-
-<div class="toast" id="toast"></div>
-
-<nav class="nav"><div class="in">
-  <button data-p="home" class="on" onclick="go('home')"><span class="e">🏠</span>Home</button>
-  <button data-p="sale" onclick="go('sale')"><span class="e">💰</span>Sale</button>
-  <button data-p="cost" onclick="go('cost')"><span class="e">🧾</span>Kharcha</button>
-  <button data-p="stock" onclick="go('stock')"><span class="e">📦</span>Stock</button>
-  <button data-p="hisab" onclick="go('hisab')"><span class="e">📊</span>Hisab</button>
-</div></nav>
-
+:root{--bg:#F7F1E2;--card:#FFFDF6;--green:#0C3B2E;--green2:#14532D;--gold:#C2A059;--ink:#22271F;--mut:#6B7263;--red:#B3372F;--amber:#9A6B00;--line:#E4DCC4}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:86px}
+header{background:linear-gradient(135deg,var(--green),var(--green2));color:#FFF7E0;padding:14px 16px 12px;position:sticky;top:0;z-index:5;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+header .t{font-family:Georgia,serif;font-size:21px;font-weight:700;letter-spacing:.4px}
+header .s{font-size:12px;opacity:.85}
+main{max-width:760px;margin:0 auto;padding:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin:0 0 11px;box-shadow:0 1px 3px rgba(60,50,10,.05)}
+.card h3{margin:0 0 8px;font-family:Georgia,serif;color:var(--green);font-size:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 12px}
+.stat .k{font-size:11.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+.stat .v{font-size:19px;font-weight:700;margin-top:2px}
+.stat .n{font-size:11.5px;color:var(--mut);margin-top:1px}
+.hero{background:linear-gradient(135deg,var(--green),#1B6A45);color:#FFF7E0;border:none}
+.hero .k{color:#D9C98F}.hero .v{font-size:24px}.hero .n{color:#E8E0C4}
+.pill{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:99px;vertical-align:middle}
+.p-pend{background:#FBEBC0;color:var(--amber)}.p-conf{background:#DDF0DD;color:#226622}.p-prov{background:#E7E4F5;color:#4A3F8F}.p-exp{background:#FBE3E0;color:var(--red)}
+.row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.row:last-child{border-bottom:none}.row .r{text-align:right;white-space:nowrap}
+.small{font-size:12px;color:var(--mut)}.tiny{font-size:11px;color:var(--mut)}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--green);color:#FFF7E0;border:none;border-radius:10px;padding:9px 14px;font-weight:600}
+.btn.gold{background:var(--gold);color:#2A2110}.btn.ghost{background:#fff;border:1px solid var(--green);color:var(--green)}
+.btn.sm{padding:5px 10px;font-size:12.5px;border-radius:8px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit;margin:3px 0 9px}
+label{font-size:12.5px;font-weight:600;color:var(--green)}
+nav{position:fixed;left:0;right:0;bottom:0;background:#FFFDF6;border-top:1px solid var(--line);display:flex;z-index:6}
+nav button{flex:1;background:none;border:none;padding:8px 2px 10px;font-size:11px;color:var(--mut);font-weight:600}
+nav button.on{color:var(--green)}nav button .ic{display:block;font-size:19px}
+.sheet{position:fixed;inset:0;background:rgba(20,25,15,.45);display:none;z-index:9}
+.sheet.open{display:block}
+.sheet .box{position:absolute;left:0;right:0;bottom:0;background:var(--bg);border-radius:18px 18px 0 0;padding:16px;max-height:82vh;overflow:auto}
+.sheet .box button.m{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:13px;margin:0 0 9px;font-weight:600;color:var(--green)}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}td.r,th.r{text-align:right}
+.search{margin-bottom:10px}
+#lock{position:fixed;inset:0;background:var(--green);color:#FFF7E0;z-index:20;display:none;padding:40px 24px;text-align:center}
+a{color:var(--green2)}
+</style></head><body>
+<div id="lock"><div style="font-family:Georgia,serif;font-size:24px;margin-bottom:8px">Bean Buzz</div><div class="small" style="color:#E8E0C4">PIN daalo</div><input id="pinIn" type="password" inputmode="numeric" style="max-width:200px;margin:16px auto;text-align:center"><br><button class="btn gold" onclick="tryPin()">Kholo</button><div id="pinErr" style="margin-top:10px;font-size:13px"></div></div>
+<header><div class="t">Bean Buzz</div><div class="s">Business Management · November 2026 · Simple Hisab</div></header>
+<main id="app"></main>
+<nav id="nav"></nav>
+<div class="sheet" id="moreSheet"><div class="box"><h3 style="margin:0 0 10px;font-family:Georgia,serif;color:var(--green)">More</h3><div id="moreBtns"></div><button class="btn ghost" style="width:100%" onclick="closeMore()">Band Karo</button></div></div>
 <script>
-/* ================= CORE: DATA + HISAB LOGIC ================= */
-var FIRST_MONTH = '2026-11'; // opening stock counted on 01 Nov 2026
-var LS_KEY = 'beanbuzz_tracker_v2';
-var APP_VERSION = 7;
-var REMOTE_BASE = 'https://higgsfieldaiofficial-netizen.github.io/beanbuzz-tracker/';
-var Store = {
-  get: function(){ try{ if (window.AndroidStore) { var v = AndroidStore.read(LS_KEY); if (v) return v; } }catch(e){} try{ return localStorage.getItem(LS_KEY); }catch(e){ return null; } },
-  set: function(v){ try{ if (window.AndroidStore) { AndroidStore.write(LS_KEY, v); return; } }catch(e){} try{ localStorage.setItem(LS_KEY, v); }catch(e){} }
-};
-
-/* Item master — rate list from the notebook (per-unit cost).
-   open = quantity counted in Opening Stock, 01/11/2026. Sab editable hai. */
-var SEED_ITEMS = [
- ['hotglass','Hot Coffee Glass 210ml','pc',2.4,47,25],
- ['chocglass','Chocolate Coffee Glass 250ml','pc',5.6,23,25],
- ['coffeeglass','Coffee Glass 350ml','pc',5.5,216,50],
- ['packglass','Packing Coffee Glass 350ml','pc',5.5,3,25],
- ['soupglass','Soup Glass','pc',0.28,350,100],
- ['friesbox','Fries Box','pc',7,126,25],
- ['chatbowl','Chat Bowl','pc',3.5,31,25],
- ['monoplate','Mono Plate (Small White)','pc',0.8,100,50],
- ['momoplate','Momo Plate','packet',45,1,1],
- ['tissue','Tissue','packet',11,5,2],
- ['straw','Black Straw','packet',50,4,2],
- ['momospoon','Momo Spoon','packet',70,3,1],
- ['burgerstick','Burger Stick','packet',45,1,1],
- ['bigplate','Big Plate','pc',2.39,18,10],
- ['packbox','Packing Box / Container','pc',5,3,25],
- ['momopack','Momo Packing Plastic','packet',80,6,2],
- ['satni','Momo Packing Chutney (Satni)','packet',40,2,1],
- ['jholbowl','Jhol Momo Bowl','packet',45,2,1],
- ['momo','Momo','pc',6,150,100],
- ['kmomo','Kurkure Momo','pc',8,0,50],
- ['vegmomo','Veg Momo','pc',7,0,50],
- ['blueberry','Blueberry Crush 750ml','bottle',257,1.5,1],
- ['strawberry','Strawberry Crush 750ml','bottle',152,1.5,1],
- ['tomatosauce','Tomato Sauce 1.2kg','bottle',85,1,1],
- ['caramel','Caramel Coffee','gm',0.348,600,200],
- ['frappe','Frappe','gm',0.428,885,200],
- ['sugar','Sugar','gm',0.057,1000,500],
- ['milkpowder','Milk Powder','gm',0.465,700,200],
- ['biscoff','Biscoff','packet',235,2,1],
- ['coffee','Coffee','gm',0.999,750,200],
- ['fries','Fries','gm',0.1044,2500,1000],
- ['hershey','Hershey Syrup','bottle',0,0,1],
- ['cheesedress','Cheese Dressing 1kg','packet',180,1,1],
- ['cheese','Cheese','packet',150,1,1],
- ['periperi','Peri Peri 250gm','packet',166,0,1],
- ['mayo','Veeba Magic Mayonnaise 1kg','packet',76,3,1],
- ['tandoori','Tandoori Mayonnaise 1kg','packet',209.5,1,1],
- ['besan','Besan','gm',0.057,0,500],
- ['cornflour','Cornflour','gm',0.0667,0,500],
- ['maida','Maida','gm',0.0522,0,500],
- ['chatmasala','Chat Masala 100gm','packet',79.5,0,1],
- ['chilly','Chilly Powder','gm',0.0514,0,500],
- ['ginger','Ginger Powder','packet',71,0,1],
- ['garlic','Garlic Powder 400gm','packet',209,0,1],
- ['sweetcorn','Sweet Corn','packet',110,1,1],
- ['paprika','Sweet Paprika 454gm','packet',452,0,1],
- ['aromatic','Aromatic Powder 500gm','packet',171,0,1],
- ['sriracha','Sriracha Sauce 570gm','bottle',238,0,1],
- ['amulmilk','Amul Milk 1L','pc',78.33,13,6],
- ['icecream','Ice Cream','gm',0.0813,1500,500],
- ['breadcrumbs','Breadcrumbs','gm',0.142,1000,200],
- ['cornflakes','Cornflakes 500gm','packet',110,1,1],
- ['badam','Badam','gm',0.18,0,200],
- ['refine','Refine Oil','ml',0.164,2600,750]
-];
-
-/* Sales seed — notebook: 1 Nov 4590, 2 Nov 6589, 3 Nov 4230, 5 Nov 5020, 6 Nov 4854 */
-var SEED_SALES = [
- ['2026-11-01',4590,''],['2026-11-02',6589,''],['2026-11-03',4230,''],
- ['2026-11-05',5020,'Notebook me date par 4 ke upar 5 likha hai'],['2026-11-06',4854,''],
- ['2026-11-07',0,'Dukan Bandh'],['2026-11-08',0,'Dukan Bandh'],['2026-11-09',0,'Dukan Bandh'],
- ['2026-11-10',0,'Dukan Bandh'],['2026-11-11',0,'Dukan Bandh']
-];
-
-/* Kharcha seed — [date, kind, itemId|null, name, qty, amount, note]
-   kind: stock | fresh | op | waste   (Oct wali entries opening stock banane ki khareed hai) */
-var SEED_COSTS = [
- ['2026-10-29','stock','chocglass','',50,280,'250ml glass 50pc'],
- ['2026-10-29','stock','bigplate','',18,45,'Plate'],
- ['2026-10-29','stock','hotglass','',25,60,'Hot glass 25pc'],
- ['2026-10-29','stock','burgerstick','',1,40,''],
- ['2026-10-29','stock','maida','',5000,261,'Maida 5kg'],
- ['2026-10-29','stock',null,'Stock item (line unclear)',0,261,'Notebook line saaf nahi'],
- ['2026-10-29','stock','ginger','',1,71,''],
- ['2026-10-29','stock','garlic','',1,209,''],
- ['2026-10-29','stock','sriracha','',1,233,'570gm'],
- ['2026-10-29','stock','sweetcorn','',1,110,''],
- ['2026-10-29','stock','paprika','',1,452,''],
- ['2026-10-29','stock','aromatic','',1,171,'500gm'],
- ['2026-10-29','stock','refine','',4000,495,'Refine 4L'],
- ['2026-10-30','fresh',null,'Dhania',0,20,''],
- ['2026-10-30','op',null,'Menu / Printing',0,50,'Menu'],
- ['2026-10-31','stock','momo','',283,1700,'Momo lot'],
- ['2026-10-31','stock','amulmilk','',12,943,'Amul milk case'],
- ['2026-10-31','op',null,'Other',0,1128,'Notebook me "Abhinash" likha hai'],
- ['2026-10-31','op',null,'Rapido / Delivery',0,73,'Rapido'],
- ['2026-11-01','stock','momo','',200,1200,'S Momo 200pc'],
- ['2026-11-01','stock','kmomo','',100,800,'K Momo 100pc'],
- ['2026-11-01','op',null,'Rapido / Delivery',0,82,'Rapido'],
- ['2026-11-01','stock','vegmomo','',50,350,'Veg Momo'],
- ['2026-11-01','fresh',null,'Chips',0,200,''],
- ['2026-11-01','fresh',null,'Chips',0,20,''],
- ['2026-11-02','stock','momo','',300,1800,''],
- ['2026-11-02','stock','monoplate','',150,120,'Mono plate'],
- ['2026-11-02','op',null,'Rapido / Delivery',0,110,'Rapido'],
- ['2026-11-02','fresh',null,'Onion / Piaj',0,100,''],
- ['2026-11-03','stock','momo','',300,1800,'300 Momo'],
- ['2026-11-03','stock','milkpowder','',1000,465,'1kg'],
- ['2026-11-03','stock','caramel','',600,209,'Chocolate/Caramel 600gm'],
- ['2026-11-03','stock','tomatosauce','',1,76,'1 bottle'],
- ['2026-11-03','stock','mayo','',2,170,'Mayo'],
- ['2026-11-03','stock','breadcrumbs','',1000,142,'1kg'],
- ['2026-11-03','stock','tissue','',9,100,'9 packet'],
- ['2026-11-03','stock','momospoon','',1,70,'1 packet'],
- ['2026-11-03','fresh',null,'Chicken',0,650,''],
- ['2026-11-03','stock','badam','',1000,180,'Badam 1kg'],
- ['2026-11-03','fresh',null,'Milk (roz ka)',0,340,''],
- ['2026-11-03','op',null,'Bag / Extra Packing',0,15,'Bag'],
- ['2026-11-03','stock','packbox','',71,357,'Container'],
- ['2026-11-03','stock','packbox','',24,119,'Container'],
- ['2026-11-03','op',null,'Rapido / Delivery',0,110,'Rapido'],
- ['2026-11-04','fresh',null,'Onion / Piaj',0,50,''],
- ['2026-11-05','fresh',null,'Onion / Piaj',0,20,''],
- ['2026-11-05','fresh',null,'Onion / Piaj',0,60,'Piaj'],
- ['2026-11-05','fresh',null,'Chips',0,100,''],
- ['2026-11-05','fresh',null,'Chicken',0,50,''],
- ['2026-11-06','fresh',null,'Tomato',0,20,''],
- ['2026-11-06','stock','momo','',333,2000,'C/K Momo lot'],
- ['2026-11-07','stock','fries','',5000,375,'7 Nov group — notebook total 2345 se balance'],
- ['2026-11-07','stock','mayo','',1,76,'Mayo 1 packet'],
- ['2026-11-07','stock','besan','',10000,571,'Besan ~10kg @57'],
- ['2026-11-07','stock','cornflour','',5000,333,'Cornflour 5kg @66'],
- ['2026-11-07','stock','refine','',6000,990,'Refine 750ml x 8'],
- ['2026-11-07','stock','momo','',300,1800,'C Momo 300 x 6'],
- ['2026-11-07','op',null,'Disposal / Safai',0,395,'Disposal'],
- ['2026-11-07','op',null,'Rapido / Delivery',0,110,'Rapido'],
- ['2026-11-07','fresh',null,'Chicken',0,250,''],
- ['2026-11-07','fresh',null,'Tomato',0,20,''],
- ['2026-11-07','fresh',null,'Dhania',0,20,'']
-];
-
-var DB = null;
-function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-function seedDB(){
-  var d = { items:[], sales:[], costs:[], closings:{}, openings:{}, settlements:[], savings:[], adjustments:[], wallet:{ openingCash:0, openingOnline:0 }, priceLog:[], meta:{ updatedAt: 1 }, settings:{ partner: false } };
-  SEED_ITEMS.forEach(function(r){ d.items.push({id:r[0],name:r[1],unit:r[2],rate:r[3],open:r[4],low:r[5],cat:'Grocery'}); });
-  SEED_SALES.forEach(function(r){ d.sales.push({id:uid()+Math.random(),date:r[0],amount:r[1],cash:r[1],online:0,note:r[2]}); });
-  SEED_COSTS.forEach(function(r){ d.costs.push({id:uid()+Math.random(),date:r[0],kind:r[1],itemId:r[2],name:r[3],qty:r[4],amount:r[5],note:r[6],pay:'cash',rate:0}); });
-  d.items.forEach(function(it){ if(it.rate>0) d.priceLog.push({itemId:it.id, date:'2026-11-01', price:it.rate}); });
-  return d;
-}
-function migrateDB(){
-  if(!DB.openings) DB.openings = {};
-  if(!DB.savings) DB.savings = [];
-  if(!DB.adjustments) DB.adjustments = [];
-  if(!DB.wallet) DB.wallet = { openingCash:0, openingOnline:0 };
-  if(!DB.priceLog) DB.priceLog = [];
-  DB.items.forEach(function(it){ if(!it.cat) it.cat = 'Grocery'; });
-  DB.sales.forEach(function(s){ if(s.cash === undefined){ s.cash = +s.amount || 0; s.online = 0; } });
-  DB.costs.forEach(function(c){ if(!c.pay) c.pay = 'cash'; if(c.rate === undefined) c.rate = 0; });
-  if(!DB.priceLog.length){ DB.items.forEach(function(it){ if(it.rate>0) DB.priceLog.push({itemId:it.id, date:'2026-11-01', price:it.rate}); }); }
-}
-function load(){
-  try{ var raw = Store.get(); if(raw){ DB = JSON.parse(raw); if(DB && DB.items){ if(!DB.meta) DB.meta = { updatedAt: 1 }; if(!DB.settings) DB.settings = { partner: false }; migrateDB(); return; } } }catch(e){}
-  DB = seedDB(); save();
-}
-function save(){ DB.meta = DB.meta || {}; DB.meta.updatedAt = Date.now(); try{ Store.set(JSON.stringify(DB)); }catch(e){} }
-function PARTNER(){ return !!(DB.settings && DB.settings.partner); }
-function itemById(id){ for(var i=0;i<DB.items.length;i++) if(DB.items[i].id===id) return DB.items[i]; return null; }
-
-/* ---------- date helpers ---------- */
-function mkey(dstr){ return dstr.slice(0,7); }
-function monthShift(mk, delta){
-  var p = mk.split('-'), y = +p[0], m = +p[1]-1+delta;
-  y += Math.floor(m/12); m = ((m%12)+12)%12;
-  return y + '-' + ('0'+(m+1)).slice(-2);
-}
-function monthLabel(mk){
-  var names=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var p=mk.split('-'); return names[+p[1]-1]+' '+p[0];
-}
-function dstrOf(d){ return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
-function fmtDate(dstr){
-  var p=dstr.split('-'); var names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return (+p[2])+' '+names[+p[1]-1];
-}
-function inMonth(dstr, mk){ return mkey(dstr)===mk; }
-function cmpMonth(a,b){ return a<b?-1:(a>b?1:0); }
-
-/* ---------- stock math ---------- */
-function qtyDelta(itemId, mk, kinds){
-  var q=0;
-  DB.costs.forEach(function(c){
-    if(c.itemId!==itemId || !c.qty) return;
-    if(kinds.indexOf(c.kind)<0) return;
-    if(mkey(c.date)!==mk) return;
-    q += (c.kind==='waste' ? -c.qty : c.qty);
-  });
-  return q;
-}
-function runningQty(item, mk){
-  /* qty at end of month mk. Oct-2026 khareed opening stock me pehle se gini hai,
-     isliye FIRST_MONTH se pehle ki entries qty me dobara nahi judti. */
-  var q = item.open, m = FIRST_MONTH;
-  while(cmpMonth(m, mk) <= 0){
-    q += qtyDelta(item.id, m, ['stock','waste']);
-    if(m===mk) break;
-    m = monthShift(m, 1);
-  }
-  return q;
-}
-function openingQtyFor(item, mk){
-  if(cmpMonth(mk, FIRST_MONTH) < 0) return 0;
-  var ov = DB.openings && DB.openings[mk];
-  if(ov && ov[item.id] !== undefined && ov[item.id] !== null && ov[item.id] !== '') return +ov[item.id];
-  if(cmpMonth(mk, FIRST_MONTH) === 0) return item.open;
-  var prev = monthShift(mk, -1);
-  var cl = DB.closings[prev];
-  if(cl && cl[item.id] !== undefined && cl[item.id] !== null && cl[item.id] !== '') return +cl[item.id];
-  return runningQty(item, prev);
-}
-function closingQtyFor(item, mk){
-  var cl = DB.closings[mk];
-  if(cl && cl[item.id] !== undefined && cl[item.id] !== null && cl[item.id] !== '') return +cl[item.id];
-  return openingQtyFor(item, mk) + qtyDelta(item.id, mk, ['stock','waste']);
-}
-function hasClosing(mk){
-  var cl = DB.closings[mk]; if(!cl) return false;
-  return Object.keys(cl).some(function(k){ return cl[k]!=='' && cl[k]!==null && cl[k]!==undefined; });
-}
-
-/* ---------- P&L ---------- */
-function plCalc(mk){
-  var sales=0, stockBuy=0, fresh=0, op=0, wasteAmt=0;
-  DB.sales.forEach(function(s){ if(inMonth(s.date,mk)) sales += +s.amount; });
-  DB.costs.forEach(function(c){
-    if(!inMonth(c.date,mk)) return;
-    if(c.kind==='stock') stockBuy += +c.amount;
-    else if(c.kind==='fresh') fresh += +c.amount;
-    else if(c.kind==='op') op += +c.amount;
-    else if(c.kind==='waste') wasteAmt += +c.amount;
-  });
-  var openVal=0, closeVal=0, cogsStock=0;
-  DB.items.forEach(function(it){
-    var oq = openingQtyFor(it, mk), cq = closingQtyFor(it, mk);
-    var bought = qtyDelta(it.id, mk, ['stock']);
-    var wasted = -qtyDelta(it.id, mk, ['waste']);
-    var consumed = oq + bought - wasted - cq;
-    openVal += oq * it.rate;
-    closeVal += cq * it.rate;
-    cogsStock += consumed * it.rate;
-  });
-  var cogs = cogsStock + fresh + wasteAmt;
-  var gross = sales - cogs;
-  var net = gross - op;
-  var cashProfit = sales - (stockBuy + fresh + op + wasteAmt);
-  var closed = hasClosing(mk);
-  return { sales:sales, stockBuy:stockBuy, fresh:fresh, op:op, wasteAmt:wasteAmt,
-           openVal:openVal, closeVal:closeVal, cogsStock:cogsStock, cogs:cogs,
-           gross:gross, net:net, cashProfit:cashProfit, closed:closed,
-           displayProfit: closed ? net : cashProfit, isTrue: closed };
-}
-
-/* ---------- wallet (cash/online), savings, price history ---------- */
-function savingsTotal(){ var t=0; (DB.savings||[]).forEach(function(s){ t += (s.type==='out' ? -(+s.amount) : (+s.amount)); }); return t; }
-function savingsOfMonth(mk){ var t=0; (DB.savings||[]).forEach(function(s){ if(inMonth(s.date,mk)) t += (s.type==='out' ? -(+s.amount) : (+s.amount)); }); return t; }
-function walletCalc(){
-  var cash = +((DB.wallet && DB.wallet.openingCash) || 0), online = +((DB.wallet && DB.wallet.openingOnline) || 0);
-  DB.sales.forEach(function(s){ cash += (+s.cash || 0); online += (+s.online || 0); });
-  DB.costs.forEach(function(c){ if(c.pay==='online') online -= +c.amount; else cash -= +c.amount; });
-  (DB.savings||[]).forEach(function(s){ var a=+s.amount; if(s.type==='out'){ if(s.mode==='online') online+=a; else cash+=a; } else { if(s.mode==='online') online-=a; else cash-=a; } });
-  (DB.adjustments||[]).forEach(function(a){ if(a.mode==='online') online += +a.amount; else cash += +a.amount; });
-  return { cash:cash, online:online, total:cash+online, savings:savingsTotal() };
-}
-function monthFlow(mk, mode){
-  var inn=0, out=0;
-  DB.sales.forEach(function(s){ if(inMonth(s.date,mk)) inn += (mode==='online' ? (+s.online||0) : (+s.cash||0)); });
-  DB.costs.forEach(function(c){ if(inMonth(c.date,mk) && ((c.pay||'cash')===mode)) out += +c.amount; });
-  (DB.savings||[]).forEach(function(s){ if(inMonth(s.date,mk) && s.mode===mode){ if(s.type==='out') inn += +s.amount; else out += +s.amount; } });
-  (DB.adjustments||[]).forEach(function(a){ if(inMonth(a.date,mk) && a.mode===mode){ if(+a.amount>=0) inn += +a.amount; else out += -a.amount; } });
-  return { inn:inn, out:out, net:inn-out };
-}
-function priceHist(itemId){
-  return (DB.priceLog||[]).filter(function(p){ return p.itemId===itemId; }).slice().sort(function(a,b){ return a.date<b.date?-1:1; });
-}
-function logPrice(itemId, date, price){
-  price = Math.round((+price)*10000)/10000; if(!price || price<=0) return;
-  var h = priceHist(itemId); var last = h[h.length-1];
-  if(last && Math.abs(last.price-price) < 0.0001) return;
-  if(!DB.priceLog) DB.priceLog = [];
-  DB.priceLog.push({ itemId:itemId, date:date, price:price });
-}
-
-/* ---------- weeks (Mon-Sun) ---------- */
-function mondayOf(dstr){
-  var p=dstr.split('-'), d=new Date(+p[0], +p[1]-1, +p[2]);
-  var day=(d.getDay()+6)%7; d.setDate(d.getDate()-day); return d;
-}
-function weeksOfMonth(mk){
-  var p=mk.split('-'), y=+p[0], mo=+p[1]-1;
-  var first=new Date(y,mo,1), last=new Date(y,mo+1,0);
-  var weeks=[], cur=mondayOf(dstrOf(first)), guard=0;
-  while(cur<=last && guard<8){
-    var end=new Date(cur); end.setDate(end.getDate()+6);
-    weeks.push({start:dstrOf(cur), end:dstrOf(end)});
-    cur=new Date(end); cur.setDate(cur.getDate()+1); guard++;
-  }
-  return weeks;
-}
-function weekCalc(w){
-  var sales=0, out=0;
-  DB.sales.forEach(function(s){ if(s.date>=w.start && s.date<=w.end) sales += +s.amount; });
-  DB.costs.forEach(function(c){ if(c.date>=w.start && c.date<=w.end) out += +c.amount; });
-  var profit = sales - out;
-  var settled = 0;
-  DB.settlements.forEach(function(x){ if(x.week===w.start) settled += +x.amount; });
-  return { sales:sales, out:out, profit:profit, share:Math.max(profit,0)/2, settled:settled };
-}
-function inr(n){
-  var neg = n<0; n = Math.round(Math.abs(n));
-  var s = n.toString(), last3 = s.slice(-3), rest = s.slice(0,-3);
-  var out = rest ? rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + last3 : last3;
-  return (neg?'-₹':'₹') + out;
-}
-function qtyFmt(q){
-  if(q===null || q===undefined) return '—';
-  var r = Math.round(q*100)/100;
-  return (r % 1 === 0) ? r.toString() : r.toString();
-}
-</script>
-
-<script>
-/* ================= UI ================= */
-var SHEET_URL = 'https://docs.google.com/spreadsheets/d/1SQ9-s8lY96hutC6y-kk3aEBebIu6qouVxpcEzBcu1BM/edit';
-var SYNC_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbzBfmFNVVKMbLoJ85EHOmhmx8CGjWVtEKMysKJE27v21HxVvwpQb6aY9WaZWnDcaZhw/exec';
-var curMonth = FIRST_MONTH;
-var costKind = 'stock';
-var costFilter = 'all';
-var KINDLBL = { stock:'Stock', fresh:'Fresh', op:'Operating', waste:'Wastage' };
-var KINDICON = { stock:'📦', fresh:'🥬', op:'🧾', waste:'🗑' };
-
-function toast(msg){
-  var t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(function(){ t.classList.remove('show'); }, 2200);
-}
-function go(p){
-  document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('active'); });
-  document.getElementById('pg-'+p).classList.add('active');
-  document.querySelectorAll('.nav button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-p')===p); });
-  render();
-  window.scrollTo(0,0);
-}
-function shiftMonth(d){ curMonth = monthShift(curMonth, d); render(); }
-function esc(s){ return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
-
+const SEED={"seedVer": "bbv4-2026-11-12", "items": [{"ref": 1, "name": "Hot Coffee Glass", "unit": "pc", "packText": "25 pieces pack", "packBaseQty": 25, "refPrice": 60, "note": "2.40/piece. 210 ml capacity is descriptive only."}, {"ref": 2, "name": "Chocolate Coffee Glass", "unit": "pc", "packText": "50 pieces pack", "packBaseQty": 50, "refPrice": 280, "note": "5.60/piece. 250 ml capacity."}, {"ref": 3, "name": "Fries Box", "unit": "pc", "packText": "per piece", "packBaseQty": 1, "refPrice": 7, "note": ""}, {"ref": 4, "name": "Chaat Bowl", "unit": "pc", "packText": "per piece", "packBaseQty": 1, "refPrice": 3.5, "note": "Alias: Chat Bowl"}, {"ref": 5, "name": "Momo Plate", "unit": "pc", "packText": "50 pieces pack", "packBaseQty": 50, "refPrice": 40, "note": "0.80/piece"}, {"ref": 6, "name": "Tissue", "unit": "packet", "packText": "packet (contents unclear)", "packBaseQty": 1, "refPrice": 25, "note": "PENDING: per packet hai ya kuch aur, aur packet me kitne tissue — confirm karna hai."}, {"ref": 7, "name": "Black Straw", "unit": "pc", "packText": "50 pieces pack", "packBaseQty": 50, "refPrice": 50, "note": "1/piece"}, {"ref": 8, "name": "Cold Coffee Glass", "unit": "pc", "packText": "per piece, 350 ml capacity", "packBaseQty": 1, "refPrice": 5.5, "note": "Alias: Coffee Glass 350 ml"}, {"ref": 9, "name": "Packing Coffee Glass", "unit": "pc", "packText": "per piece, 350 ml capacity", "packBaseQty": 1, "refPrice": 5.5, "note": "Item 8 se alag item hai."}, {"ref": 10, "name": "Soup Glass", "unit": "pc", "packText": "10 bundles x 50 = 500 pieces", "packBaseQty": 500, "refPrice": 140, "note": "PENDING: 140 pure 500 pc ka hai ya ek bundle (50 pc) ka — confirm."}, {"ref": 11, "name": "Refined Oil", "unit": "g", "packText": "650 g pack", "packBaseQty": 650, "refPrice": 123, "note": "Cost per g = 123/650. Litre conversion pending — g se ml convert nahi hoga."}, {"ref": 12, "name": "Momo Packing Plastic", "unit": "packet", "packText": "unknown", "packBaseQty": null, "refPrice": null, "note": "PENDING: identity aur price. Silver packing se alag hai kya — confirm."}, {"ref": 13, "name": "Momo Eating Spoon", "unit": "packet", "packText": "1 packet", "packBaseQty": 1, "refPrice": 70, "note": "PENDING: pieces per packet."}, {"ref": 14, "name": "Burger Stick", "unit": "packet", "packText": "1 packet", "packBaseQty": 1, "refPrice": 45, "note": "PENDING: pieces per packet."}, {"ref": 15, "name": "Big Burger Plate", "unit": "pc", "packText": "18 pieces pack (provisional)", "packBaseQty": 18, "refPrice": 45, "note": "Provisional: 45 pure pack ka hai to 2.50/piece."}, {"ref": 16, "name": "Branded Packing Box", "unit": "pc", "packText": "100 pieces pack", "packBaseQty": 100, "refPrice": 500, "note": "5/piece"}, {"ref": 17, "name": "Silver Momo Packing Plastic", "unit": "packet", "packText": "1 packet", "packBaseQty": 1, "refPrice": 80, "note": "PENDING: pieces per packet."}, {"ref": 18, "name": "Blueberry Crush", "unit": "ml", "packText": "750 ml bottle", "packBaseQty": 750, "refPrice": 257, "note": ""}, {"ref": 19, "name": "Strawberry Crush Malabar", "unit": "ml", "packText": "750 ml bottle", "packBaseQty": 750, "refPrice": 252, "note": ""}, {"ref": 20, "name": "Frozen Momo", "unit": "pc", "packText": "150 pieces", "packBaseQty": 150, "refPrice": 900, "note": "Variant unspecified. 6/piece sirf is variant ke liye — har momo par apply nahi hoga."}, {"ref": 21, "name": "Tomato Sauce", "unit": "g", "packText": "1.2 kg pack", "packBaseQty": 1200, "refPrice": 85, "note": ""}, {"ref": 22, "name": "Caramel Syrup", "unit": "g", "packText": "600 g pack", "packBaseQty": 600, "refPrice": 209, "note": ""}, {"ref": 23, "name": "Frappe", "unit": "g", "packText": "1 kg pack", "packBaseQty": 1000, "refPrice": 428, "note": ""}, {"ref": 24, "name": "Sugar", "unit": "g", "packText": "1 kg pack", "packBaseQty": 1000, "refPrice": 57, "note": ""}, {"ref": 25, "name": "Milk Powder", "unit": "g", "packText": "1 kg pack", "packBaseQty": 1000, "refPrice": 465, "note": ""}, {"ref": 26, "name": "Biscoff Biscuit", "unit": "packet", "packText": "1 packet", "packBaseQty": 1, "refPrice": 235, "note": "PENDING: weight/count per packet."}, {"ref": 27, "name": "Black Coffee", "unit": "g", "packText": "1 kg pack", "packBaseQty": 1000, "refPrice": 999, "note": "Item name in old records: Coffee"}, {"ref": 28, "name": "Fries", "unit": "g", "packText": "2.5 kg pack", "packBaseQty": 2500, "refPrice": 261, "note": ""}, {"ref": 29, "name": "Cheese Dressing", "unit": "g", "packText": "1 kg pack", "packBaseQty": 1000, "refPrice": 180, "note": ""}, {"ref": 30, "name": "Peri Peri Masala", "unit": "g", "packText": "250 g pack", "packBaseQty": 250, "refPrice": 166, "note": "Alias: Pery Pery Masala (ref 50) — ek hi item, duplicate nahi."}, {"ref": 31, "name": "Veeba Magic Mayonnaise", "unit": "g", "packText": "1 kg pack", "packBaseQty": 1000, "refPrice": 76, "note": ""}, {"ref": 32, "name": "Tandoori Sauce", "unit": "packet", "packText": "unknown", "packBaseQty": null, "refPrice": null, "note": "PENDING: price aur size. Tandoori Mayonnaise se alag hai."}, {"ref": 33, "name": "Amul Gold Milk", "unit": "ml", "packText": "12 packs x 1 litre carton", "packBaseQty": 12000, "refPrice": 943, "note": "943/12 = per litre rate."}, {"ref": 35, "name": "Besan", "unit": "g", "packText": "1 kg pack", "packBaseQty": 1000, "refPrice": 57, "note": ""}, {"ref": 36, "name": "Corn Flour", "unit": "g", "packText": "1 kg pack", "packBaseQty": 1000, "refPrice": 66.67, "note": ""}, {"ref": 37, "name": "Tandoori Mayonnaise", "unit": "g", "packText": "1 kg pack", "packBaseQty": 1000, "refPrice": 209.52, "note": ""}, {"ref": 38, "name": "Chaat Masala", "unit": "g", "packText": "100 g pack", "packBaseQty": 100, "refPrice": 80, "note": ""}, {"ref": 39, "name": "Dry Red Chilli", "unit": "g", "packText": "1 kg pack", "packBaseQty": 1000, "refPrice": 52, "note": "Supplied rate preserved."}, {"ref": 40, "name": "Ginger Powder", "unit": "g", "packText": "45 g pack", "packBaseQty": 45, "refPrice": 71, "note": ""}, {"ref": 41, "name": "Garlic Powder", "unit": "g", "packText": "400 g pack", "packBaseQty": 400, "refPrice": 209, "note": ""}, {"ref": 42, "name": "Sweet Corn", "unit": "packet", "packText": "1 packet", "packBaseQty": 1, "refPrice": 110, "note": "PENDING: weight per packet."}, {"ref": 43, "name": "Sweet Paprika", "unit": "g", "packText": "500 g pack (Aromatic)", "packBaseQty": 500, "refPrice": 171, "note": ""}, {"ref": 44, "name": "Sri Raja Spicy Sauce", "unit": "g", "packText": "570 g pack", "packBaseQty": 570, "refPrice": 238, "note": "Supplied name preserved; identity editable."}, {"ref": 45, "name": "Ice Cream", "unit": "ml", "packText": "4 litre pack", "packBaseQty": 4000, "refPrice": 325, "note": "4 litre ko 4 kg mat samjho."}, {"ref": 46, "name": "Bread Crumbs", "unit": "g", "packText": "1 kg pack", "packBaseQty": 1000, "refPrice": 142, "note": ""}, {"ref": 47, "name": "Cornflakes", "unit": "g", "packText": "500 g pack", "packBaseQty": 500, "refPrice": 110, "note": ""}, {"ref": 48, "name": "Badam", "unit": "g", "packText": "1 kg pack", "packBaseQty": 1000, "refPrice": 180, "note": "Reference 180; actual purchase (P020) 190 — dono preserved."}, {"ref": 49, "name": "Momo Chutney Pouch", "unit": "packet", "packText": "1 packet", "packBaseQty": 1, "refPrice": 80, "note": "PENDING: pouches per packet."}, {"ref": 51, "name": "Carry Bag Packing Plastic", "unit": "packet", "packText": "unknown", "packBaseQty": null, "refPrice": null, "note": "PENDING: price aur pieces per packet."}], "opening": [{"itemRef": 1, "text": "47 pieces", "qtyBase": 47, "value": 112.8, "status": "Confirmed", "note": ""}, {"itemRef": 2, "text": "23 pieces", "qtyBase": 23, "value": 128.8, "status": "Confirmed", "note": ""}, {"itemRef": 3, "text": "136 pieces", "qtyBase": 136, "value": 952, "status": "Confirmed", "note": ""}, {"itemRef": 4, "text": "33 pieces", "qtyBase": 33, "value": 115.5, "status": "Confirmed", "note": ""}, {"itemRef": 5, "text": "3 packets", "qtyBase": 150, "value": 120, "status": "Provisional", "note": "50-pc packs maanke 150 pc."}, {"itemRef": 6, "text": "5 packets", "qtyBase": 5, "value": null, "status": "Pending", "note": "Packet contents aur 25 wali price basis pending — value nahi bhara."}, {"itemRef": 7, "text": "4 packets", "qtyBase": 200, "value": 200, "status": "Provisional", "note": "50-pc packs maanke 200 pc."}, {"itemRef": 8, "text": "216 pieces", "qtyBase": 216, "value": 1188, "status": "Confirmed", "note": ""}, {"itemRef": 9, "text": "3 pieces", "qtyBase": 3, "value": 16.5, "status": "Confirmed", "note": ""}, {"itemRef": 17, "text": "6 packets", "qtyBase": 6, "value": 480, "status": "Provisional", "note": "Packet value 480; pieces pending."}, {"itemRef": 10, "text": "7 packets (350 pieces likha hai)", "qtyBase": 350, "value": null, "status": "Pending", "note": "Value 98 hoga ya 980 — price basis confirm hone tak Pending."}, {"itemRef": 11, "text": "4 packets", "qtyBase": 2600, "value": 492, "status": "Provisional", "note": "650 g packs maanke 2,600 g."}, {"itemRef": 13, "text": "3 packets", "qtyBase": 3, "value": 210, "status": "Provisional", "note": "Packet value 210; pieces pending."}, {"itemRef": 14, "text": "1 packet", "qtyBase": 1, "value": 45, "status": "Provisional", "note": "Packet value 45; pieces pending."}, {"itemRef": 15, "text": "1 packet (18 pieces likha hai)", "qtyBase": 18, "value": 45, "status": "Provisional", "note": ""}, {"itemRef": 51, "text": "2 packets", "qtyBase": 2, "value": null, "status": "Pending", "note": "Price aur pieces pending."}, {"itemRef": 18, "text": "1 full bottle + 1 half bottle", "qtyBase": 1125, "value": 385.5, "status": "Provisional", "note": "750 ml bottle maanke 1,125 ml."}, {"itemRef": 19, "text": "1 full bottle + 'half se bhi half'", "qtyBase": 937.5, "value": 315, "status": "Pending", "note": "1.25 bottle provisional; quarter-bottle interpretation confirm karna hai."}, {"itemRef": 20, "text": "150 pieces", "qtyBase": 150, "value": 900, "status": "Provisional", "note": "Variant pending."}, {"itemRef": 21, "text": "1 bottle", "qtyBase": 1200, "value": 85, "status": "Provisional", "note": "Bottle = 1.2 kg reference pack maanke."}, {"itemRef": 22, "text": "1 bottle", "qtyBase": 600, "value": 209, "status": "Provisional", "note": "Bottle = 600 g reference pack maanke."}, {"itemRef": 23, "text": "885 g", "qtyBase": 885, "value": 378.78, "status": "Confirmed", "note": "428/kg se exact 378.78."}, {"itemRef": 24, "text": "1 kg", "qtyBase": 1000, "value": 57, "status": "Confirmed", "note": ""}, {"itemRef": 25, "text": "700 g", "qtyBase": 700, "value": 325.5, "status": "Confirmed", "note": ""}, {"itemRef": 26, "text": "2 packets", "qtyBase": 2, "value": 470, "status": "Provisional", "note": "Packet value 470; weight/count pending."}, {"itemRef": 27, "text": "3 packets '(750 gm)'", "qtyBase": null, "value": null, "status": "Pending", "note": "750 g TOTAL hai ya HAR packet 750 g? Confirm hone tak qty/value Pending."}, {"itemRef": 32, "text": "1 packet", "qtyBase": 1, "value": null, "status": "Pending", "note": "Price aur size pending."}, {"itemRef": 31, "text": "3 packets", "qtyBase": 3000, "value": 228, "status": "Provisional", "note": "1 kg packs maanke 3 kg."}, {"itemRef": 29, "text": "2 packets", "qtyBase": 2000, "value": 360, "status": "Provisional", "note": "1 kg packs maanke 2 kg."}, {"itemRef": 33, "text": "13 packets (13 litre likha hai)", "qtyBase": 13000, "value": 1021.58, "status": "Confirmed", "note": "13 x 943/12 = 1021.5833..."}, {"itemRef": 42, "text": "1 packet", "qtyBase": 1, "value": 110, "status": "Provisional", "note": "Packet value 110; weight pending."}, {"itemRef": 28, "text": "1 packet", "qtyBase": 2500, "value": 261, "status": "Provisional", "note": "2.5 kg pack maanke."}, {"itemRef": 45, "text": "1.5 KG (jaise likha tha)", "qtyBase": null, "value": null, "status": "Pending", "note": "Rate litre par hai, stock KG me — conversion ke bina value Pending."}, {"itemRef": 47, "text": "1 packet", "qtyBase": 500, "value": 110, "status": "Provisional", "note": "500 g pack maanke."}, {"itemRef": 46, "text": "1 packet", "qtyBase": 1000, "value": 142, "status": "Provisional", "note": "1 kg pack maanke."}], "entries": [{"id": "P001", "date": "2026-11-01", "raw": "S Momo", "amount": 1200, "qtyNote": "200 pc; variant/unit confirm", "payment": "pending", "type": "pending"}, {"id": "P002", "date": "2026-11-01", "raw": "K Momo", "amount": 800, "qtyNote": "100P; variant preserved", "payment": "pending", "type": "pending"}, {"id": "P003", "date": "2026-11-01", "raw": "Rapido", "amount": 82, "qtyNote": "Transport/delivery", "payment": "pending", "type": "expense"}, {"id": "P004", "date": "2026-11-01", "raw": "Veg Momo", "amount": 350, "qtyNote": "Quantity unknown", "payment": "pending", "type": "pending"}, {"id": "P005", "date": "2026-11-01", "raw": "Chips", "amount": 200, "qtyNote": "Identity/quantity unknown — Fries nahi maana", "payment": "pending", "type": "pending"}, {"id": "P006", "date": "2026-11-01", "raw": "Chips", "amount": 20, "qtyNote": "Alag line hai", "payment": "pending", "type": "pending"}, {"id": "P007", "date": "2026-11-02", "raw": "Momo", "amount": 1800, "qtyNote": "Quantity/variant pending — 300 guess nahi kiya", "payment": "pending", "type": "pending"}, {"id": "P008", "date": "2026-11-02", "raw": "Momo Plate", "amount": 120, "qtyNote": "Purchased quantity pending", "payment": "pending", "type": "pending"}, {"id": "P009", "date": "2026-11-02", "raw": "Rapido", "amount": 110, "qtyNote": "Transport/delivery", "payment": "pending", "type": "expense"}, {"id": "P010", "date": "2026-11-02", "raw": "Onion/Phana", "amount": 100, "qtyNote": "Dusra word unclear — waise hi rakha", "payment": "pending", "type": "pending"}, {"id": "P011", "date": "2026-11-03", "raw": "Momo", "amount": 1800, "qtyNote": "300 momo likha hai; variant pending", "payment": "pending", "type": "pending"}, {"id": "P012", "date": "2026-11-03", "raw": "Milk Powder", "amount": 465, "qtyNote": "Pack size yahan explicitly nahi diya", "payment": "pending", "type": "pending"}, {"id": "P013", "date": "2026-11-03", "raw": "Chocolate", "amount": 209, "qtyNote": "Caramel se map nahi kiya (price match hone par bhi nahi)", "payment": "pending", "type": "pending"}, {"id": "P014", "date": "2026-11-03", "raw": "Tomato Sauce", "amount": 76, "qtyNote": "Pack/brand pending; fresh tomato se alag", "payment": "pending", "type": "pending"}, {"id": "P015", "date": "2026-11-03", "raw": "Mayo", "amount": 170, "qtyNote": "Product/quantity pending", "payment": "pending", "type": "pending"}, {"id": "P016", "date": "2026-11-03", "raw": "Bread Crumbs", "amount": 142, "qtyNote": "Pack size confirm pending", "payment": "pending", "type": "pending"}, {"id": "P017", "date": "2026-11-03", "raw": "Tissue", "amount": 100, "qtyNote": "'9P' likha hai; 100 combined amount maana hai — confirm pending", "payment": "pending", "type": "pending"}, {"id": "P018", "date": "2026-11-03", "raw": "Spoon", "amount": 70, "qtyNote": "1 packet; contents pending", "payment": "pending", "type": "pending"}, {"id": "P019", "date": "2026-11-03", "raw": "Chicken", "amount": 650, "qtyNote": "Weight pending", "payment": "pending", "type": "pending"}, {"id": "P020", "date": "2026-11-03", "raw": "Badam", "amount": 190, "qtyNote": "1 kg explicit; actual rate 190 (reference 180 se alag)", "payment": "pending", "type": "pending", "itemRef": 48, "qtyBase": 1000}, {"id": "P021", "date": "2026-11-03", "raw": "Milk", "amount": 340, "qtyNote": "Brand/volume pending", "payment": "pending", "type": "pending"}, {"id": "P022", "date": "2026-11-03", "raw": "Bag", "amount": 15, "qtyNote": "'VS2' unclear — raw note preserved", "payment": "pending", "type": "pending"}, {"id": "P023", "date": "2026-11-03", "raw": "Container", "amount": 357, "qtyNote": "Type/count pending", "payment": "pending", "type": "pending"}, {"id": "P024", "date": "2026-11-03", "raw": "Container", "amount": 119, "qtyNote": "Alag line; type/count pending", "payment": "pending", "type": "pending"}, {"id": "P025", "date": "2026-11-03", "raw": "Rapido", "amount": 110, "qtyNote": "Transport/delivery", "payment": "pending", "type": "expense"}, {"id": "P026", "date": "2026-11-04", "raw": "Piaj/Bilahe", "amount": 50, "qtyNote": "Combined vegetables — split guess nahi kiya", "payment": "pending", "type": "pending"}, {"id": "P027", "date": "2026-11-05", "raw": "Bilahe", "amount": 20, "qtyNote": "Quantity pending", "payment": "pending", "type": "pending"}, {"id": "P028", "date": "2026-11-05", "raw": "Piaj", "amount": 60, "qtyNote": "Quantity pending", "payment": "pending", "type": "pending"}, {"id": "P029", "date": "2026-11-05", "raw": "Chips", "amount": 100, "qtyNote": "Identity/quantity pending", "payment": "pending", "type": "pending"}, {"id": "P030", "date": "2026-11-05", "raw": "Chicken", "amount": 50, "qtyNote": "Weight pending", "payment": "pending", "type": "pending"}, {"id": "P031", "date": "2026-11-06", "raw": "Tomato", "amount": 20, "qtyNote": "Quantity pending", "payment": "pending", "type": "pending"}, {"id": "P032", "date": "2026-11-06", "raw": "C/K Momo", "amount": 2000, "qtyNote": "Mixed/unclear variants — split guess nahi kiya", "payment": "pending", "type": "pending"}, {"id": "P033", "date": "2026-11-07", "raw": "Fries", "amount": 261.9, "qtyNote": "'5Kg' likha hai; 261.90 total maana hai — basis disputed, confirm pending", "payment": "pending", "type": "pending"}, {"id": "P034", "date": "2026-11-07", "raw": "Mayo", "amount": 76, "qtyNote": "1 packet; identity/size confirm", "payment": "pending", "type": "pending"}, {"id": "P035", "date": "2026-11-07", "raw": "Unknown item", "amount": 571, "qtyNote": "'(Kg 57) 5Kg' — naam aur hisab unresolved (5x57=285 hota hai)", "payment": "pending", "type": "pending"}, {"id": "P036", "date": "2026-11-07", "raw": "Unknown item", "amount": 333, "qtyNote": "'(Kg 66) 5Kg' — naam unresolved (333/5=66.60/kg)", "payment": "pending", "type": "pending"}, {"id": "P037", "date": "2026-11-07", "raw": "Unknown item", "amount": 990, "qtyNote": "'(750ml 123/-) 8P' — 8x123=984 hota hai; naam unresolved", "payment": "pending", "type": "pending"}, {"id": "P038", "date": "2026-11-07", "raw": "C Momo", "amount": 1800, "qtyNote": "300 x 6 explicit — ye PURCHASE hai, sale nahi", "payment": "pending", "type": "pending"}, {"id": "P039", "date": "2026-11-07", "raw": "Disposel", "amount": 395, "qtyNote": "Disposable item identity/count pending", "payment": "pending", "type": "pending"}, {"id": "P040", "date": "2026-11-07", "raw": "Rapido", "amount": 110, "qtyNote": "Transport/delivery", "payment": "pending", "type": "expense"}, {"id": "P041", "date": "2026-11-07", "raw": "Chicken", "amount": 250, "qtyNote": "Weight pending", "payment": "pending", "type": "pending"}, {"id": "P042", "date": "2026-11-07", "raw": "Tomato", "amount": 20, "qtyNote": "Quantity pending", "payment": "pending", "type": "pending"}, {"id": "P043", "date": "2026-11-07", "raw": "Dhania", "amount": 20, "qtyNote": "Quantity pending", "payment": "pending", "type": "pending"}], "sales": [{"id": "S001", "date": null, "amount": 4590, "cash": null, "online": null}, {"id": "S002", "date": null, "amount": 6589, "cash": null, "online": null}, {"id": "S003", "date": null, "amount": 5020, "cash": null, "online": null}, {"id": "S004", "date": null, "amount": 4854, "cash": null, "online": null}], "menu": [["Veg Momo", "Veg Steam Momo", 70, "9 pieces"], ["Veg Momo", "Veg Kurkure Momo", 80, ""], ["Veg Momo", "Veg Fried Momo", 80, ""], ["Veg Momo", "Veg Dynamite Momo", 100, ""], ["Veg Momo", "Jhol Momo — Veg", 100, ""], ["Non-Veg Momo", "Chicken Steam Momo", 60, ""], ["Non-Veg Momo", "Fried Momo", 80, ""], ["Non-Veg Momo", "Chicken Kurkure Momo", 100, ""], ["Non-Veg Momo", "Chicken Dynamite Momo", 120, ""], ["Non-Veg Momo", "Jhol Momo — Non-Veg", 120, ""], ["Special", "Momo Chaat", 130, "Veg/non-veg aur portion pending"], ["Coffee & Shakes", "Hot Coffee", 40, ""], ["Coffee & Shakes", "Cold Coffee — Thick", 70, ""], ["Coffee & Shakes", "Hot Chocolate", 80, ""], ["Coffee & Shakes", "Oreo Coffee Shake", 99, ""], ["Coffee & Shakes", "Biscoff Coffee Shake", 110, ""], ["Coffee & Shakes", "Strawberry Crush Shake", 110, ""], ["Coffee & Shakes", "Strawberry Rose Crush Shake", 120, ""], ["Coffee & Shakes", "Blueberry Shake", 140, ""], ["French Fries", "Classic French Fries", 79, "Weight pending"], ["French Fries", "Peri Peri Fries", 99, "Weight pending"], ["French Fries", "Loaded Cheesy Fries", 120, "Weight/recipe pending"], ["French Fries", "Cheese Loaded Chicken Fries", 150, "Weight/recipe pending"], ["Chicken Snacks", "Boneless Chicken Popcorn — Half", 60, "10 pieces"], ["Chicken Snacks", "Boneless Chicken Popcorn — Full", 110, "20 pieces"], ["Chicken Snacks", "Chicken Pokora/Pakora", 60, "Portion pending"]], "pending": [["P033–P037 subtotal mismatch", "Lines ka jod 2,231.90 banta hai, notebook me Total 2,345 likha hai — fark 113.10. Koi balancing entry nahi daali gayi."], ["P033 Fries basis", "261.90 pure 5 Kg ka hai, per kg hai, ya packet ka? Reference 261/2.5kg se alag hai — dono preserved."], ["P035 naam + hisab", "Item ka naam nahi mila; 5 x 57 = 285 hota hai, line 571 ki hai. Besan guess nahi kiya."], ["P036 naam", "Item ka naam nahi mila; 333/5 = 66.60/kg. Corn Flour guess nahi kiya."], ["P037 naam + hisab", "8 x 123 = 984 hota hai, line 990 ki hai. Refined Oil guess nahi kiya; 750ml aur 650g alag hain."], ["Sales dates (S001–S004)", "4 sale amounts mile hain (4,590 / 6,589 / 5,020 / 4,854 = 21,053) lekin dates overwritten hain. Date aur Cash/Online split Pending hai. Ye poore 1–10 Nov ya poore mahine ki sale nahi maani gayi."], ["Sales — purani dated entries", "Purane app me 1–6 Nov ki dated sales (kul 25,283, jisme 4,230 wali ek aur entry) thi. Naye spec ke hisab se woh abhi candidates se match pending hai — purana data backup me safe hai, delete nahi hua."], ["05/11 blank line", "Ek blank entry hai — woh zero expense nahi maani gayi, sirf note rakha hai."], ["Purchases ka payment mode", "P001–P043 me Cash/Online aur paid/unpaid supplied nahi hai — sab Pending rakha hai, kisi account se kata nahi."], ["Purchases ki classification", "Rapido (kul 412) ke alawa lines stock hain ya expense — confirm pending hai. Sabko inventory nahi maana gaya."], ["Black Coffee opening", "3 packets '(750 gm)' — 750 g total hai ya per packet, confirm pending."], ["Soup Glass value", "140 pure 500 pc ka hai ya ek bundle (50 pc) ka — value 98 ya 980, confirm pending."], ["Ice Cream conversion", "Opening 1.5 KG hai, rate 4 litre par hai — kg se litre conversion ke bina value Pending."], ["Strawberry Crush opening", "'Half se bhi half' = quarter bottle provisional rakha hai — confirm pending."], ["Tissue rate basis", "25 per packet hai ya kuch aur, aur packet me kitne — confirm pending."], ["Money snapshot ka cut-off", "Cash 996 + Online 835 = 1,831 CURRENT shop money hai. Ye 1 Nov ka opening balance nahi hai; cut-off time confirm pending. Isiliye ledger balance abhi reconcile Pending hai."], ["Savings amount", "Supplied nahi hai — Pending rakha hai, zero nahi."], ["Gas", "3,100/cylinder, lagbhag 2/month = 6,200 sirf estimate hai — November ka confirmed transaction nahi banaya gaya."], ["Rent / Electricity", "Amounts confirm nahi hue — category missing ka matlab 'kharcha nahi hai' nahi maana gaya."], ["Closing Stock", "Month-end par physical count hoga — abhi koi closing quantity bhari nahi gayi, isliye final Stock Used Cost aur final Profit Pending hai."]], "money": {"cash": 996, "online": 835}, "savingsSupplied": null, "transfers": [], "closing": {}, "settings": {"salary": 30000, "pin": null}};
+const KEY='beanbuzz_v4_db_1';
+let db;
+function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function load(){try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){db=null} if(!db||db.seedVer!==SEED.seedVer){db=structuredClone(SEED);save()}}
+const $=s=>document.querySelector(s);
+const inr=n=>n==null||n===''||isNaN(n)?null:'₹'+Number(n).toLocaleString('en-IN',{maximumFractionDigits:2,minimumFractionDigits:(Math.round(n*100)%100!==0)?2:0});
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function dstr(iso){if(!iso)return '<span class="pill p-pend">Date Pending</span>';const[a,b,c]=iso.split('-');return c+'/'+b+'/'+a}
+function itemByRef(r){return db.items.find(i=>i.ref===r)}
+function perUnit(it){if(it.refPrice==null||!it.packBaseQty)return null;return it.refPrice/it.packBaseQty}
+let screen='home';
+const NAV=[['home','🏠','Home'],['opening','📦','Opening Stock'],['purchases','🛒','Purchases'],['sales','🍽️','Food Sales'],['closing','🧮','Closing Stock']];
+function renderNav(){$('#nav').innerHTML=NAV.map(n=>'<button class="'+(screen===n[0]?'on':'')+'" onclick="go(\''+n[0]+'\')"><span class="ic">'+n[1]+'</span>'+n[2]+'</button>').join('')+'<button onclick="openMore()"><span class="ic">☰</span>More</button>'}
+function go(s){screen=s;renderNav();render();window.scrollTo(0,0)}
+function openMore(){const b=[['expenses','💸 Expenses'],['money','💰 Money & Savings'],['reports','📊 Reports'],['rates','🏷️ Item Rates'],['menu','📋 Menu (Selling Prices)'],['pending','⚠️ Pending Details ('+db.pending.length+')'],['settings','⚙️ Settings & Backup']];$('#moreBtns').innerHTML=b.map(x=>'<button class="m" onclick="closeMore();go(\''+x[0]+'\')">'+x[1]+'</button>').join('');$('#moreSheet').classList.add('open')}
+function closeMore(){$('#moreSheet').classList.remove('open')}
+function entries(){return db.entries}
+function sum(a){return a.reduce((t,x)=>t+(+x.amount||0),0)}
+function datedSales(){return db.sales.filter(s=>s.date)}
+function salesTotal(){return db.sales.reduce((t,s)=>t+(s.amount!=null?+s.amount:((+s.cash||0)+(+s.online||0))),0)}
+function openingKnown(){let v=0,p=0;db.opening.forEach(o=>{if(o.value!=null)v+=+o.value;else p++});return{v,p}}
 function render(){
-  document.getElementById('mLabHome').textContent = monthLabel(curMonth);
-  document.getElementById('mLabHisab').textContent = monthLabel(curMonth);
-  document.getElementById('stockMonthLab').textContent = monthLabel(curMonth);
-  var ol = document.getElementById('openMonthLab'); if(ol) ol.textContent = monthLabel(curMonth);
-  renderHome(); renderSales(); renderCosts(); renderStock(); renderHisab(); renderSavings(); renderAdj(); renderOpening(); renderReport();
+ const A=$('#app');
+ if(screen==='home')A.innerHTML=vHome();
+ else if(screen==='opening')A.innerHTML=vOpening();
+ else if(screen==='purchases')A.innerHTML=vEntries('purchases');
+ else if(screen==='expenses')A.innerHTML=vEntries('expenses');
+ else if(screen==='sales')A.innerHTML=vSales();
+ else if(screen==='closing')A.innerHTML=vClosing();
+ else if(screen==='money')A.innerHTML=vMoney();
+ else if(screen==='reports')A.innerHTML=vReports();
+ else if(screen==='rates')A.innerHTML=vRates();
+ else if(screen==='menu')A.innerHTML=vMenu();
+ else if(screen==='pending')A.innerHTML=vPending();
+ else if(screen==='settings')A.innerHTML=vSettings();
+ if(screen==='rates')bindSearch();
 }
-
-/* ---------- HOME ---------- */
-function renderHome(){
-  var p = plCalc(curMonth);
-  document.getElementById('heroLabel').textContent = p.isTrue ? 'NET PROFIT (ASLI — CLOSING STOCK KE SAATH)' : 'CASH PROFIT (ASLI PROFIT CLOSING STOCK KE BAAD)';
-  document.getElementById('heroProfit').textContent = inr(p.displayProfit);
-  document.getElementById('heroSub').textContent = monthLabel(curMonth) + ' • Sale ' + inr(p.sales) + (p.isTrue ? ' • COGS ' + inr(p.cogs) : ' • Kul kharcha ' + inr(p.stockBuy + p.fresh + p.op + p.wasteAmt));
-  var hs = document.getElementById('heroSplit');
-  if (PARTNER()) {
-    var sh = Math.max(p.displayProfit, 0) / 2;
-    hs.innerHTML = '<div class="sp"><div class="n">ABHINASH — 50%</div><div class="v">' + inr(sh) + '</div></div><div class="sp"><div class="n">PARTNER — 50%</div><div class="v">' + inr(sh) + '</div></div>';
-  } else {
-    hs.innerHTML = '<div class="sp"><div class="n">OWNER — PURA PROFIT</div><div class="v" style="font-size:18px">Abhinash Changmai • 100%</div></div>';
-  }
-  document.getElementById('partnerLine').innerHTML = PARTNER()
-    ? 'Phir Net Profit ka <b>50 : 50</b> hissa — aadha Abhinash, aadha Partner.'
-    : 'Pura Net Profit <b>Abhinash ka</b> hai — abhi koi partner nahi hai.';
-  var g = document.getElementById('statGrid');
-  g.innerHTML =
-    stat('Total Sale', inr(p.sales)) +
-    stat('Stock Khareed', inr(p.stockBuy)) +
-    stat('Fresh Kharcha', inr(p.fresh)) +
-    stat('Operating', inr(p.op)) +
-    stat('Wastage', inr(p.wasteAmt), 'red') +
-    stat('Stock Value (abhi)', inr(p.closeVal), 'gold');
-  function stat(k, v, cls){ return '<div class="stat '+(cls||'')+'"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>'; }
-
-  var td = dstrOf(new Date());
-  var tSale=0, tCash=0, tOn=0, tExp=0;
-  DB.sales.forEach(function(s){ if(s.date===td){ tSale += +s.amount; tCash += (+s.cash||0); tOn += (+s.online||0); } });
-  DB.costs.forEach(function(c){ if(c.date===td) tExp += +c.amount; });
-  document.getElementById('todayLab').textContent = fmtDate(td);
-  document.getElementById('todayGrid').innerHTML = stat('Aaj Ka Total Sale', inr(tSale)) + stat('Aaj Cash Sale', inr(tCash)) + stat('Aaj Online Sale', inr(tOn)) + stat('Aaj Ka Kharcha', inr(tExp), 'red');
-  var w = walletCalc();
-  document.getElementById('walletGrid').innerHTML = stat('Cash Balance', inr(w.cash)) + stat('Online Balance', inr(w.online)) + stat('Total Shop Money', inr(w.total), 'gold') + stat('Total Savings (Bachat)', inr(w.savings), 'gold');
-  document.getElementById('walletNote').innerHTML = 'Total Shop Money = Cash + Online Balance. Savings alag pot hai — savings me gaya paisa cash/online se kat chuka hai, isliye double counting nahi hoti. Monthly Profit upar hero me hai, Current Stock Value upar grid me.';
-  var lows = DB.items.filter(function(it){ var q = runningQty(it, curMonth); return it.low > 0 && q <= it.low; });
-  var la = document.getElementById('lowAlerts');
-  la.innerHTML = lows.length ? lows.map(function(it){
-    return '<div class="alert">⚠️ <div><b>Low Stock:</b> ' + esc(it.name) + ' — sirf <b>' + qtyFmt(runningQty(it, curMonth)) + ' ' + esc(it.unit) + '</b> bacha hai</div></div>';
-  }).join('') : '';
-
-  var all = [];
-  DB.sales.forEach(function(s){ all.push({date:s.date, icon:'💰', cls:'g', a:'Sale — ' + fmtDate(s.date), b:s.note||'Daily sale', amt:+s.amount}); });
-  DB.costs.forEach(function(c){ all.push({date:c.date, icon:KINDICON[c.kind], cls:c.kind==='waste'?'r':'', a:costLabel(c), b:fmtDate(c.date) + ' • ' + KINDLBL[c.kind] + (c.note ? ' • ' + c.note : ''), amt:-c.amount}); });
-  all.sort(function(x,y){ return y.date < x.date ? -1 : (y.date > x.date ? 1 : 0); });
-  var rl = document.getElementById('recentList');
-  rl.innerHTML = all.length ? all.slice(0,8).map(function(r){
-    return '<div class="row"><div class="ic '+r.cls+'">'+r.icon+'</div><div class="mid"><div class="a">'+esc(r.a)+'</div><div class="b">'+esc(r.b)+'</div></div><div class="amt '+(r.amt<0?'neg':'')+'">'+inr(r.amt)+'</div></div>';
-  }).join('') : '<div class="empty">Abhi koi entry nahi hai</div>';
-}
-function costLabel(c){
-  if(c.itemId){ var it = itemById(c.itemId); if(it) return it.name + (c.qty ? ' × ' + qtyFmt(c.qty) : ''); }
-  return c.name || 'Kharcha';
-}
-
-/* ---------- SALE ---------- */
-function saleTotal(){
-  var c = parseFloat(document.getElementById('saleCash').value)||0;
-  var o = parseFloat(document.getElementById('saleOnline').value)||0;
-  document.getElementById('saleTotalBox').innerHTML = 'Total Sale: <b>' + inr(c+o) + '</b> = Cash ' + inr(c) + ' + Online ' + inr(o);
-}
-function addSale(){
-  var d = document.getElementById('saleDate').value;
-  var c = parseFloat(document.getElementById('saleCash').value)||0;
-  var o = parseFloat(document.getElementById('saleOnline').value)||0;
-  var n = document.getElementById('saleNote').value.trim();
-  var eid = document.getElementById('saleEditId').value;
-  if(!d || (c+o) <= 0){ toast('Date aur cash/online sale daalo'); return; }
-  if(eid){
-    DB.sales.forEach(function(x){ if(x.id===eid){ x.date=d; x.cash=c; x.online=o; x.amount=c+o; x.note=n; } });
-    document.getElementById('saleEditId').value=''; document.getElementById('saleBtn').textContent='Sale Save Karo';
-  } else {
-    DB.sales.push({id:uid(), date:d, amount:c+o, cash:c, online:o, note:n});
-  }
-  save(); document.getElementById('saleCash').value=''; document.getElementById('saleOnline').value=''; document.getElementById('saleNote').value=''; saleTotal();
-  curMonth = mkey(d); render(); toast('Sale save ho gaya ✅');
-}
-function editSale(id){
-  var s=null; DB.sales.forEach(function(x){ if(x.id===id) s=x; }); if(!s) return;
-  document.getElementById('saleDate').value=s.date;
-  document.getElementById('saleCash').value=(+s.cash||0);
-  document.getElementById('saleOnline').value=(+s.online||0);
-  document.getElementById('saleNote').value=s.note||'';
-  document.getElementById('saleEditId').value=id;
-  document.getElementById('saleBtn').textContent='Sale Update Karo';
-  saleTotal(); window.scrollTo(0,0);
-}
-function delSale(id){
-  if(!confirm('Ye sale entry delete kar dein?')) return;
-  DB.sales = DB.sales.filter(function(s){ return s.id!==id; });
-  save(); render();
-}
-function renderSales(){
-  var list = DB.sales.filter(function(s){ return inMonth(s.date, curMonth); })
-                     .sort(function(a,b){ return a.date<b.date?-1:1; });
-  var tot = list.reduce(function(t,s){ return t + (+s.amount); }, 0);
-  document.getElementById('saleListTitle').textContent = 'Sales — ' + monthLabel(curMonth) + ' • Total ' + inr(tot);
-  var el = document.getElementById('saleList');
-  el.innerHTML = list.length ? list.map(function(s){
-    return '<div class="row"><div class="ic g">💰</div><div class="mid"><div class="a">' + fmtDate(s.date) + ' — Sale</div><div class="b">Cash ' + inr(+s.cash||0) + ' • Online ' + inr(+s.online||0) + (s.note ? ' • ' + esc(s.note) : '') + '</div></div><div class="amt">' + inr(s.amount) + '</div><button class="del" onclick="editSale(\''+s.id+'\')">✎</button><button class="del" onclick="delSale(\''+s.id+'\')">✕</button></div>';
-  }).join('') : '<div class="empty">Is mahine koi sale entry nahi</div>';
-}
-
-/* ---------- KHARCHA ---------- */
-function setKind(k){
-  costKind = k;
-  document.querySelectorAll('#kindSeg button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-k')===k); });
-  var needsItem = (k==='stock' || k==='waste');
-  document.getElementById('itemRow').style.display = needsItem ? '' : 'none';
-  document.getElementById('qtyRow').style.display = needsItem ? '' : 'none';
-  document.getElementById('nameRow').style.display = needsItem ? 'none' : '';
-  document.getElementById('catRow').style.display = (k==='op') ? '' : 'none';
-  document.getElementById('nameLab').textContent = (k==='op') ? 'Category naam (auto)' : 'Cheez ka naam';
-  if(k==='op'){ document.getElementById('costName').value = document.getElementById('costCat').value; }
-  costAuto();
-}
-function fillItemSelect(){
-  var sel = document.getElementById('costItem');
-  sel.innerHTML = DB.items.map(function(it){
-    return '<option value="'+it.id+'">' + esc(it.name) + ' (' + esc(it.unit) + ' • ₹' + it.rate + ')</option>';
-  }).join('');
-}
-function costAuto(){
-  var box = document.getElementById('autoBox');
-  if(costKind==='stock' || costKind==='waste'){
-    var it = itemById(document.getElementById('costItem').value);
-    var q = parseFloat(document.getElementById('costQty').value);
-    var rr = parseFloat(document.getElementById('costRate').value) || (it ? it.rate : 0);
-    if(it){
-      box.style.display = '';
-      if(q){
-        var amt = Math.round(q * rr * 100)/100;
-        document.getElementById('costAmt').value = amt;
-        box.innerHTML = 'Auto hisab: ' + qtyFmt(q) + ' ' + esc(it.unit) + ' × ₹' + rr + ' = <b>' + inr(amt) + '</b> (amount badal bhi sakte ho)';
-      } else {
-        box.innerHTML = 'Rate: <b>₹' + rr + ' / ' + esc(it.unit) + '</b> — qty daalte hi amount apne aap bhar jayega';
-      }
-      return;
-    }
-  }
-  box.style.display = 'none';
-}
-function addCost(){
-  var d = document.getElementById('costDate').value;
-  var a = parseFloat(document.getElementById('costAmt').value);
-  if(!d || !a){ toast('Date aur amount daalo'); return; }
-  var rec = { id:uid(), date:d, kind:costKind, itemId:null, name:'', qty:0, amount:a, note:document.getElementById('costNote').value.trim(), pay:document.getElementById('costPay').value, rate:parseFloat(document.getElementById('costRate').value)||0 };
-  if(costKind==='stock' || costKind==='waste'){
-    rec.itemId = document.getElementById('costItem').value;
-    rec.qty = parseFloat(document.getElementById('costQty').value) || 0;
-    if(costKind==='stock' && rec.itemId && rec.qty > 0){
-      var up = rec.rate || (a / rec.qty);
-      rec.rate = Math.round(up*10000)/10000;
-      var it2 = itemById(rec.itemId);
-      if(it2 && up > 0){ logPrice(rec.itemId, d, up); it2.rate = rec.rate; fillItemSelect(); document.getElementById('costItem').value = rec.itemId; }
-    }
-  } else if(costKind==='op'){
-    rec.name = document.getElementById('costCat').value;
-    var extra = document.getElementById('costName').value.trim();
-    if(extra && extra !== rec.name) rec.note = extra + (rec.note ? ' • ' + rec.note : '');
-  } else {
-    rec.name = document.getElementById('costName').value.trim() || 'Fresh item';
-  }
-  var eid = document.getElementById('costEditId').value;
-  if(eid){
-    var ix=-1; DB.costs.forEach(function(x,i){ if(x.id===eid) ix=i; });
-    if(ix>=0){ rec.id = eid; DB.costs[ix] = rec; }
-    document.getElementById('costEditId').value=''; document.getElementById('costBtn').textContent='Kharcha Save Karo';
-  } else {
-    DB.costs.push(rec);
-  }
-  save();
-  document.getElementById('costAmt').value=''; document.getElementById('costQty').value=''; document.getElementById('costNote').value=''; document.getElementById('costRate').value='';
-  curMonth = mkey(d); render(); toast('Kharcha save ho gaya ✅');
-}
-function editCost(id){
-  var c=null; DB.costs.forEach(function(x){ if(x.id===id) c=x; }); if(!c) return;
-  setKind(c.kind);
-  document.getElementById('costDate').value=c.date;
-  document.getElementById('costAmt').value=c.amount;
-  document.getElementById('costNote').value=c.note||'';
-  document.getElementById('costPay').value=c.pay||'cash';
-  document.getElementById('costRate').value=c.rate||'';
-  if(c.itemId){ document.getElementById('costItem').value=c.itemId; document.getElementById('costQty').value=c.qty||''; }
-  else if(c.kind==='op'){ document.getElementById('costCat').value=c.name||'Other'; document.getElementById('costName').value=c.name||''; }
-  else { document.getElementById('costName').value=c.name||''; }
-  document.getElementById('costEditId').value=id;
-  document.getElementById('costBtn').textContent='Kharcha Update Karo';
-  costAuto(); window.scrollTo(0,0);
-}
-function delCost(id){
-  if(!confirm('Ye kharcha entry delete kar dein?')) return;
-  DB.costs = DB.costs.filter(function(c){ return c.id!==id; });
-  save(); render();
-}
-function setCostFilter(f){
-  costFilter = f;
-  document.querySelectorAll('#costChips button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-f')===f); });
-  renderCosts();
-}
-function renderCosts(){
-  var list = DB.costs.filter(function(c){ return inMonth(c.date, curMonth) && (costFilter==='all' || c.kind===costFilter); })
-                     .sort(function(a,b){ return a.date<b.date?-1:1; });
-  var tot = list.reduce(function(t,c){ return t + (+c.amount); }, 0);
-  document.getElementById('costListTitle').textContent = 'Kharcha — ' + monthLabel(curMonth) + ' • Total ' + inr(tot);
-  var el = document.getElementById('costList');
-  el.innerHTML = list.length ? list.map(function(c){
-    return '<div class="row"><div class="ic '+(c.kind==='waste'?'r':'')+'">'+KINDICON[c.kind]+'</div><div class="mid"><div class="a">'+esc(costLabel(c))+' <span class="tag '+c.kind+'">'+KINDLBL[c.kind]+'</span></div><div class="b">'+fmtDate(c.date)+' • '+((c.pay==='online')?'📱 Online':'💵 Cash')+(c.rate ? ' • ₹'+c.rate+'/unit' : '')+(c.note ? ' • ' + esc(c.note) : '')+'</div></div><div class="amt neg">−'+inr(c.amount)+'</div><button class="del" onclick="editCost(\''+c.id+'\')">✎</button><button class="del" onclick="delCost(\''+c.id+'\')">✕</button></div>';
-  }).join('') : '<div class="empty">Is mahine koi kharcha entry nahi</div>';
-}
-
-/* ---------- STOCK ---------- */
-function renderStock(){
-  var el = document.getElementById('stockList');
-  el.innerHTML = DB.items.map(function(it){
-    var q = runningQty(it, curMonth);
-    var val = q * it.rate;
-    var low = it.low > 0 && q <= it.low;
-    var pct = it.open > 0 ? Math.max(0, Math.min(100, q / (it.open*1.6) * 100)) : 60;
-    return '<div class="stockitem" onclick="openItem(\''+it.id+'\')"><div class="l1"><span class="nm">'+esc(it.name)+'</span><span class="vl">'+inr(val)+'</span></div>' +
-      '<div class="l2"><span>Stock: <b>'+qtyFmt(q)+' '+esc(it.unit)+'</b></span><span>Rate: ₹'+it.rate+'</span><span>'+esc(it.cat||'Grocery')+'</span>' +
-      (low ? '<span class="lowb">LOW STOCK</span>' : '<span class="okb">OK</span>') + '</div>' +
-      '<div class="progress"><i style="width:'+pct+'%"></i></div></div>';
-  }).join('');
-  var cl = DB.closings[curMonth] || {};
-  var cel = document.getElementById('closingList');
-  cel.innerHTML = DB.items.map(function(it){
-    var run = runningQty(it, curMonth);
-    var v = (cl[it.id] !== undefined && cl[it.id] !== '') ? cl[it.id] : '';
-    return '<div class="row"><div class="mid"><div class="a" style="font-size:13.5px">'+esc(it.name)+'</div><div class="b">Hisab se: '+qtyFmt(run)+' '+esc(it.unit)+'</div></div><input type="number" inputmode="decimal" class="closein" data-item="'+it.id+'" placeholder="'+qtyFmt(run)+'" value="'+v+'"></div>';
-  }).join('');
-}
-function saveClosing(){
-  var cl = {};
-  document.querySelectorAll('#closingList .closein').forEach(function(inp){
-    if(inp.value !== '') cl[inp.getAttribute('data-item')] = parseFloat(inp.value);
-  });
-  DB.closings[curMonth] = cl; save(); render();
-  toast('Closing stock save — asli profit tayyar ✅');
-}
-function openItem(id){
-  var it = id ? itemById(id) : null;
-  document.getElementById('itemModalTitle').textContent = it ? 'Item Badlo — ' + it.name : 'Naya Item';
-  document.getElementById('itId').value = it ? it.id : '';
-  document.getElementById('itName').value = it ? it.name : '';
-  document.getElementById('itUnit').value = it ? it.unit : 'pc';
-  document.getElementById('itRate').value = it ? it.rate : '';
-  document.getElementById('itOpen').value = it ? it.open : 0;
-  document.getElementById('itLow').value = it ? it.low : 0;
-  document.getElementById('itCat').value = it ? (it.cat||'Grocery') : 'Grocery';
-  var hh = document.getElementById('itHistory');
-  if(it){
-    var h = priceHist(it.id);
-    hh.innerHTML = '<div class="frow"><label>Price History — purani prices hamesha safe</label>' + (h.length ? h.slice().reverse().map(function(p){ return '<div class="pl"><span class="k">' + fmtDate(p.date) + ' ' + p.date.slice(0,4) + '</span><span class="v">₹' + p.price + ' / ' + esc(it.unit) + '</span></div>'; }).join('') : '<p class="note">Abhi history nahi hai</p>') + '</div>';
-  } else { hh.innerHTML = ''; }
-  document.getElementById('itemModal').classList.add('open');
-}
-function closeItem(){ document.getElementById('itemModal').classList.remove('open'); }
-function saveItem(){
-  var id = document.getElementById('itId').value;
-  var nm = document.getElementById('itName').value.trim();
-  if(!nm){ toast('Item ka naam daalo'); return; }
-  var vals = { name:nm, unit:document.getElementById('itUnit').value.trim()||'pc', cat:document.getElementById('itCat').value.trim()||'Grocery',
-    rate:parseFloat(document.getElementById('itRate').value)||0,
-    open:parseFloat(document.getElementById('itOpen').value)||0,
-    low:parseFloat(document.getElementById('itLow').value)||0 };
-  if(id){ var it = itemById(id); if(vals.rate>0 && it.rate !== vals.rate) logPrice(id, dstrOf(new Date()), vals.rate); for(var k in vals) it[k] = vals[k]; }
-  else { DB.items.push({ id:uid(), name:vals.name, unit:vals.unit, rate:vals.rate, open:vals.open, low:vals.low }); fillItemSelect(); }
-  save(); closeItem(); render(); toast('Item save ho gaya ✅');
-}
-
-/* ---------- HISAB ---------- */
-function renderHisab(){
-  var wc = document.getElementById('walOpenCash'); if(wc && document.activeElement!==wc) wc.value = (DB.wallet && DB.wallet.openingCash) || 0;
-  var wo = document.getElementById('walOpenOnline'); if(wo && document.activeElement!==wo) wo.value = (DB.wallet && DB.wallet.openingOnline) || 0;
-  var ps = document.getElementById('pinState'); if(ps) ps.textContent = (DB.settings && DB.settings.pinHash) ? 'PIN ON hai' : 'PIN OFF hai';
-  var p = plCalc(curMonth);
-  var rows = [
-    ['Total Sale', p.sales, ''],
-    ['Opening Stock Value', p.openVal, 'sub'],
-    ['+ Stock Khareed', p.stockBuy, 'sub'],
-    ['− Closing Stock Value', -p.closeVal, 'sub'],
-    ['= COGS — Stock wala hissa', p.cogsStock, ''],
-    ['+ Fresh Kharcha', p.fresh, 'sub'],
-    ['+ Wastage', p.wasteAmt, 'sub'],
-    ['Total COGS', p.cogs, ''],
-    ['Gross Profit', p.gross, ''],
-    ['− Operating Kharcha', -p.op, 'sub'],
-    ['NET PROFIT' + (p.isTrue ? ' (ASLI)' : ' — closing stock baki hai'), p.net, 'total'],
-    ['Cash Profit (simple hisab)', p.cashProfit, '']
-  ];
-  if (PARTNER()) {
-    rows.push(['Abhinash ka hissa 50%', Math.max(p.net,0)/2, '']);
-    rows.push(['Partner ka hissa 50%', Math.max(p.net,0)/2, '']);
-  } else {
-    rows.push(['Abhinash ka Profit (100%)', Math.max(p.net,0), '']);
-  }
-  document.getElementById('plBody').innerHTML = rows.map(function(r){
-    return '<div class="pl '+(r[2]==='total'?'total':(r[2]==='sub'?'sub':''))+'"><span class="k">'+r[0]+'</span><span class="v '+(r[1]<0?'neg':'')+'">'+inr(r[1])+'</span></div>';
-  }).join('') + (p.isTrue ? '' : '<p class="note" style="margin-top:10px">⚠️ Is mahine ka <b>Closing Stock</b> abhi nahi bhara — Net Profit hisab-wale stock par hai. Stock tab me closing bharte hi ye pakka asli profit ban jayega.</p>');
-
-  document.getElementById('weekNote').textContent = PARTNER()
-    ? 'Partner ke saath hisab: hafta khatam hone par profit ka 50% share, SETTLE dabakar entry kar do. Week ka hisab cash method par hai.'
-    : 'Har hafte ka saaf hisab — sale, kharcha aur profit. Week ka hisab cash method par hai.';
-  var wl = document.getElementById('weekList');
-  wl.innerHTML = weeksOfMonth(curMonth).map(function(w){
-    var c = weekCalc(w);
-    if (PARTNER()) {
-      var bal = c.share - c.settled;
-      return '<div class="row"><div class="mid"><div class="a" style="font-size:14px">' + fmtDate(w.start) + ' – ' + fmtDate(w.end) + '</div>' +
-        '<div class="b">Sale ' + inr(c.sales) + ' • Kharcha ' + inr(c.out) + ' • Profit ' + inr(c.profit) + '<br>Partner share ' + inr(c.share) + (c.settled ? ' • Settled ' + inr(c.settled) : '') + (bal > 0 ? ' • <b style="color:#B3402E">Balance ' + inr(bal) + '</b>' : (c.share > 0 ? ' • <b style="color:#1E6B45">Settled ✅</b>' : '')) + '</div></div>' +
-        (bal > 0 ? '<button class="del" style="color:#14532D;font-size:12.5px;font-weight:700;border:1.5px solid #14532D;border-radius:10px;padding:7px 10px" onclick="settleWeek(\'' + w.start + '\',' + bal + ')">SETTLE</button>' : '') +
-        '</div>';
-    }
-    return '<div class="row"><div class="mid"><div class="a" style="font-size:14px">' + fmtDate(w.start) + ' – ' + fmtDate(w.end) + '</div>' +
-      '<div class="b">Sale ' + inr(c.sales) + ' • Kharcha ' + inr(c.out) + '</div></div>' +
-      '<div class="amt ' + (c.profit < 0 ? 'neg' : '') + '">' + inr(c.profit) + '</div></div>';
-  }).join('');
-  var su = document.getElementById('syncUrl');
-  if(su && !su.value) su.value = (DB.settings && DB.settings.syncUrl) || SYNC_URL_DEFAULT;
-}
-function settleWeek(weekStart, bal){
-  var amt = prompt('Kitna settle hua? (₹)', bal);
-  if(amt === null) return;
-  amt = parseFloat(amt); if(!amt) return;
-  DB.settlements.push({ id:uid(), week:weekStart, amount:amt, date:dstrOf(new Date()) });
-  save(); render(); toast('Settlement save ho gaya ✅');
-}
-
-/* ---------- SAVINGS / WALLET / OPENING / SEARCH / REPORTS / PIN ---------- */
-function addSaving(){
-  var d = document.getElementById('savDate').value;
-  var a = parseFloat(document.getElementById('savAmt').value);
-  if(!d || !a){ toast('Date aur amount daalo'); return; }
-  if(!DB.savings) DB.savings = [];
-  DB.savings.push({ id:uid(), date:d, amount:a, mode:document.getElementById('savMode').value, type:document.getElementById('savType').value, note:document.getElementById('savNote').value.trim() });
-  save(); document.getElementById('savAmt').value=''; document.getElementById('savNote').value=''; render(); toast('Savings save ho gaya ✅');
-}
-function delSaving(id){ if(!confirm('Ye savings entry delete kar dein?')) return; DB.savings = DB.savings.filter(function(x){ return x.id!==id; }); save(); render(); }
-function renderSavings(){
-  var el = document.getElementById('savList'); if(!el) return;
-  var g = document.getElementById('savGrid');
-  if(g) g.innerHTML = '<div class="stat gold"><div class="k">Total Savings</div><div class="v">' + inr(savingsTotal()) + '</div></div><div class="stat"><div class="k">Is Mahine Savings</div><div class="v">' + inr(savingsOfMonth(curMonth)) + '</div></div>';
-  var list = (DB.savings||[]).filter(function(x){ return inMonth(x.date, curMonth); }).sort(function(a,b){ return a.date<b.date?-1:1; });
-  el.innerHTML = list.length ? list.map(function(x){
-    return '<div class="row"><div class="ic">🏦</div><div class="mid"><div class="a">' + (x.type==='out' ? 'Savings se nikala' : 'Savings me daala') + '</div><div class="b">' + fmtDate(x.date) + ' • ' + (x.mode==='online' ? '📱 Online' : '💵 Cash') + (x.note ? ' • ' + esc(x.note) : '') + '</div></div><div class="amt ' + (x.type==='out' ? 'neg' : '') + '">' + (x.type==='out' ? '−' : '+') + inr(x.amount) + '</div><button class="del" onclick="delSaving(\''+x.id+'\')">✕</button></div>';
-  }).join('') : '<div class="empty">Is mahine savings entry nahi</div>';
-}
-function saveWalletOpen(){
-  DB.wallet = DB.wallet || {};
-  DB.wallet.openingCash = parseFloat(document.getElementById('walOpenCash').value)||0;
-  DB.wallet.openingOnline = parseFloat(document.getElementById('walOpenOnline').value)||0;
-  save(); render(); toast('Opening balance save ho gaya ✅');
-}
-function addAdjustment(){
-  var a = parseFloat(document.getElementById('adjAmt').value);
-  if(!a){ toast('Adjustment amount daalo (+ ya −)'); return; }
-  if(!DB.adjustments) DB.adjustments = [];
-  DB.adjustments.push({ id:uid(), date:dstrOf(new Date()), amount:a, mode:document.getElementById('adjMode').value, note:document.getElementById('adjNote').value.trim() });
-  save(); document.getElementById('adjAmt').value=''; document.getElementById('adjNote').value=''; render(); toast('Adjustment save ho gaya ✅');
-}
-function delAdj(id){ DB.adjustments = DB.adjustments.filter(function(x){ return x.id!==id; }); save(); render(); }
-function renderAdj(){
-  var el = document.getElementById('adjList'); if(!el) return;
-  el.innerHTML = (DB.adjustments||[]).length ? DB.adjustments.slice().reverse().slice(0,6).map(function(a){
-    return '<div class="row"><div class="mid"><div class="a" style="font-size:13.5px">' + (a.mode==='online' ? '📱 Online' : '💵 Cash') + ' adjustment</div><div class="b">' + fmtDate(a.date) + (a.note ? ' • ' + esc(a.note) : '') + '</div></div><div class="amt">' + inr(a.amount) + '</div><button class="del" onclick="delAdj(\''+a.id+'\')">✕</button></div>';
-  }).join('') : '';
-}
-function renderOpening(){
-  var el = document.getElementById('openingList'); if(!el) return;
-  var ov = (DB.openings && DB.openings[curMonth]) || {};
-  el.innerHTML = DB.items.map(function(it){
-    var auto = openingQtyFor(it, curMonth);
-    var v = (ov[it.id] !== undefined && ov[it.id] !== '') ? ov[it.id] : '';
-    return '<div class="row"><div class="mid"><div class="a" style="font-size:13.5px">' + esc(it.name) + '</div><div class="b">Opening: ' + qtyFmt(auto) + ' ' + esc(it.unit) + ' • Value ' + inr(auto*it.rate) + '</div></div><input type="number" inputmode="decimal" class="closein openin" data-item="' + it.id + '" placeholder="' + qtyFmt(auto) + '" value="' + v + '"></div>';
-  }).join('') + '<p class="note" style="margin-top:8px">Opening Stock Total Value (auto): <b>' + inr(plCalc(curMonth).openVal) + '</b> — box khali chhoda to auto value hi chalegi (pichhle mahine ka closing).</p>';
-}
-function saveOpening(){
-  var ov = {}; var any = false;
-  document.querySelectorAll('#openingList .openin').forEach(function(inp){ if(inp.value !== ''){ ov[inp.getAttribute('data-item')] = parseFloat(inp.value); any = true; } });
-  if(!DB.openings) DB.openings = {};
-  if(any) DB.openings[curMonth] = ov; else delete DB.openings[curMonth];
-  save(); render(); toast('Opening stock save ho gaya ✅');
-}
-function renderSearch(){
-  var box = document.getElementById('searchBox'); var res = document.getElementById('searchRes');
-  if(!box || !res) return;
-  var q = box.value.trim().toLowerCase();
-  if(q.length < 2){ res.innerHTML = '<p class="note">Item ka naam likhte hi uska latest rate, purane rates (price history) aur khareed ki details dikhengi. Purani price kabhi delete/overwrite nahi hoti.</p>'; return; }
-  var out = '';
-  DB.items.filter(function(it){ return it.name.toLowerCase().indexOf(q) >= 0 || (it.cat||'').toLowerCase().indexOf(q) >= 0; }).forEach(function(it){
-    var h = priceHist(it.id);
-    var totQ = 0; DB.costs.forEach(function(c){ if(c.itemId===it.id && c.kind==='stock') totQ += (+c.qty||0); });
-    out += '<div class="stockitem"><div class="l1"><span class="nm">' + esc(it.name) + '</span><span class="vl">₹' + it.rate + ' / ' + esc(it.unit) + '</span></div><div class="l2"><span>Stock abhi: <b>' + qtyFmt(runningQty(it, curMonth)) + ' ' + esc(it.unit) + '</b></span><span>Kul khareed qty: ' + qtyFmt(totQ) + '</span><span>' + esc(it.cat||'Grocery') + '</span></div>' +
-      (h.length ? '<div style="margin-top:6px">' + h.slice().reverse().map(function(p, i){ var prev = h[h.length-2-i]; var chg = ''; if(prev){ var dd = Math.round((p.price - prev.price)*100)/100; chg = dd > 0 ? ' <span class="histchg" style="color:#B3402E">▲ ₹' + dd + ' badha</span>' : (dd < 0 ? ' <span class="histchg" style="color:#1E6B45">▼ ₹' + (-dd) + ' ghata</span>' : ''); } return '<div class="pl"><span class="k">' + fmtDate(p.date) + ' ' + p.date.slice(0,4) + '</span><span class="v">₹' + p.price + chg + '</span></div>'; }).join('') + '</div>' : '<p class="note">Price history nahi hai</p>') + '</div>';
-  });
-  var cs = DB.costs.filter(function(c){ return costLabel(c).toLowerCase().indexOf(q) >= 0 || (c.note||'').toLowerCase().indexOf(q) >= 0 || c.date.indexOf(q) >= 0; }).sort(function(a,b){ return a.date<b.date?1:-1; }).slice(0,15);
-  if(cs.length) out += '<h3 style="margin:12px 0 4px;font-size:13px;color:var(--green)">KHARCHA / KHAAREED MATCH</h3>' + cs.map(function(c){ return '<div class="row"><div class="mid"><div class="a" style="font-size:13.5px">' + esc(costLabel(c)) + ' <span class="tag ' + c.kind + '">' + KINDLBL[c.kind] + '</span></div><div class="b">' + fmtDate(c.date) + ' • ' + (c.pay==='online' ? 'Online' : 'Cash') + '</div></div><div class="amt neg">−' + inr(c.amount) + '</div></div>'; }).join('');
-  var ss = DB.sales.filter(function(x){ return x.date.indexOf(q) >= 0 || (x.note||'').toLowerCase().indexOf(q) >= 0; });
-  if(ss.length) out += '<h3 style="margin:12px 0 4px;font-size:13px;color:var(--green)">SALE MATCH</h3>' + ss.map(function(x){ return '<div class="row"><div class="mid"><div class="a" style="font-size:13.5px">Sale — ' + fmtDate(x.date) + '</div><div class="b">Cash ' + inr(+x.cash||0) + ' • Online ' + inr(+x.online||0) + '</div></div><div class="amt">' + inr(x.amount) + '</div></div>'; }).join('');
-  res.innerHTML = out || '<div class="empty">Kuch nahi mila — naam ya date badal ke dekho</div>';
-}
-var repType = 'pl';
-function setReport(t){ repType = t; document.querySelectorAll('#repChips button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-r')===t); }); renderReport(); }
-function repTable(rows){ return rows.map(function(r){ return '<div class="pl ' + (r[2]||'') + '"><span class="k">' + r[0] + '</span><span class="v ' + (r[3] ? 'neg' : '') + '">' + r[1] + '</span></div>'; }).join(''); }
-function renderReport(){
-  var el = document.getElementById('repBody'); if(!el) return;
-  var lab = document.getElementById('repMonthLab'); if(lab) lab.textContent = monthLabel(curMonth);
-  var mk = curMonth, out = '';
-  if(repType==='sale'){
-    var rows = DB.sales.filter(function(x){ return inMonth(x.date,mk); }).sort(function(a,b){ return a.date<b.date?-1:1; }).map(function(x){ return [fmtDate(x.date) + ' — Cash ' + inr(+x.cash||0) + ' + Online ' + inr(+x.online||0), inr(x.amount)]; });
-    rows.push(['TOTAL SALE', inr(plCalc(mk).sales), 'total']); out = repTable(rows);
-  } else if(repType==='expense'){
-    var byCat = {}; var rows2 = DB.costs.filter(function(c){ return inMonth(c.date,mk); }).sort(function(a,b){ return a.date<b.date?-1:1; }).map(function(c){ var k = KINDLBL[c.kind]; byCat[k] = (byCat[k]||0) + (+c.amount); return [fmtDate(c.date) + ' — ' + esc(costLabel(c)) + ' (' + k + ', ' + (c.pay==='online' ? 'Online' : 'Cash') + ')', inr(c.amount), '', true]; });
-    Object.keys(byCat).forEach(function(k){ rows2.push([k + ' TOTAL', inr(byCat[k]), 'total']); });
-    out = rows2.length ? repTable(rows2) : '<div class="empty">Is mahine kharcha nahi</div>';
-  } else if(repType==='purchase'){
-    var rows3 = DB.costs.filter(function(c){ return inMonth(c.date,mk) && c.kind==='stock'; }).sort(function(a,b){ return a.date<b.date?-1:1; }).map(function(c){ return [fmtDate(c.date) + ' — ' + esc(costLabel(c)) + (c.rate ? ' @ ₹' + c.rate + '/unit' : ''), inr(c.amount)]; });
-    rows3.push(['TOTAL PURCHASE', inr(plCalc(mk).stockBuy), 'total']); out = repTable(rows3);
-  } else if(repType==='price'){
-    out = DB.items.map(function(it){ var h = priceHist(it.id); var prev = h[h.length-2]; return '<div class="pl"><span class="k">' + esc(it.name) + '<br><small style="color:var(--mut)">' + (prev ? 'Pehle ₹' + prev.price + ' (' + fmtDate(prev.date) + ')' : 'Abhi ek hi price recorded') + '</small></span><span class="v">₹' + it.rate + ' / ' + esc(it.unit) + '</span></div>'; }).join('') + '<p class="note" style="margin-top:8px">Poori history: Stock tab me item search karo ya item par tap karo.</p>';
-  } else if(repType==='opening'){
-    var p1 = plCalc(mk); out = repTable(DB.items.map(function(it){ var oq = openingQtyFor(it, mk); return [esc(it.name) + ' — ' + qtyFmt(oq) + ' ' + esc(it.unit) + ' @ ₹' + it.rate, inr(oq*it.rate)]; }).concat([['TOTAL OPENING STOCK VALUE', inr(p1.openVal), 'total']]));
-  } else if(repType==='closing'){
-    var p2 = plCalc(mk); out = repTable(DB.items.map(function(it){ var cq = closingQtyFor(it, mk); return [esc(it.name) + ' — ' + qtyFmt(cq) + ' ' + esc(it.unit) + ' @ ₹' + it.rate, inr(cq*it.rate)]; }).concat([['TOTAL CLOSING STOCK VALUE', inr(p2.closeVal), 'total'], [hasClosing(mk) ? 'Closing count bhara hua hai ✅' : 'Closing count abhi nahi bhara — hisab wala stock use hua', '', 'sub']]));
-  } else if(repType==='cash' || repType==='online'){
-    var f = monthFlow(mk, repType); var wAll = walletCalc();
-    out = repTable([['Is mahine aaya (Sale + savings wapas + adjustment)', inr(f.inn)], ['Is mahine gaya (Kharcha/Purchase + savings)', inr(f.out), '', true], ['Mahine ka net flow', inr(f.net), 'total'], ['ABHI KA ' + (repType==='online' ? 'ONLINE' : 'CASH') + ' BALANCE (kul hisab)', inr(repType==='online' ? wAll.online : wAll.cash), 'total']]);
-  } else if(repType==='savings'){
-    var rows4 = (DB.savings||[]).filter(function(x){ return inMonth(x.date,mk); }).map(function(x){ return [fmtDate(x.date) + ' — ' + (x.type==='out' ? 'Nikala' : 'Daala') + ' (' + (x.mode==='online' ? 'Online' : 'Cash') + ')', inr(x.amount), '', x.type==='out']; });
-    rows4.push(['IS MAHINE NET SAVINGS', inr(savingsOfMonth(mk)), 'total']); rows4.push(['TOTAL SAVINGS (kul)', inr(savingsTotal()), 'total']); out = repTable(rows4);
-  } else {
-    var p = plCalc(mk);
-    var yr = mk.slice(0,4), ySales = 0, yNet = 0;
-    for(var mm=1; mm<=12; mm++){ var mk2 = yr + '-' + ('0'+mm).slice(-2); if(cmpMonth(mk2, FIRST_MONTH) < 0) continue; var pp = plCalc(mk2); ySales += pp.sales; yNet += pp.net; }
-    out = repTable([['Total Sales', inr(p.sales)], ['Opening Stock Value', inr(p.openVal), 'sub'], ['+ Purchases (Stock Khareed)', inr(p.stockBuy), 'sub'], ['− Closing Stock Value', inr(-p.closeVal), 'sub'], ['COGS — stock hissa', inr(p.cogsStock)], ['+ Fresh + Wastage', inr(p.fresh + p.wasteAmt), 'sub'], ['Total COGS', inr(p.cogs), 'total'], ['Gross Profit = Sales − COGS', inr(p.gross)], ['− Other Expenses (Operating)', inr(-p.op), 'sub', true], ['NET PROFIT / LOSS (Monthly)', inr(p.net), 'total'], ['Cash Profit (bina stock adjustment)', inr(p.cashProfit)], ['YEAR ' + yr + ' — Total Sales', inr(ySales), 'sub'], ['YEAR ' + yr + ' — Net Profit', inr(yNet), 'total']]) + '<p class="note" style="margin-top:8px">Formula: <b>COGS = Opening Stock + Purchases − Closing Stock</b> · <b>Gross = Sales − COGS</b> · <b>Net = Gross − Other Expenses</b>. Purchases sirf COGS ke andar gine jate hain, dobara expense nahi bante — double counting nahi hoti. Daily P&L cash hisab se banta hai (roz ka sale − fresh − operating − wastage) — Home ke Aaj Ka Hisab me dikhta hai.</p>';
-  }
-  el.innerHTML = out || '<div class="empty">Data nahi hai</div>';
-}
-function downloadCSV(){
-  var rows = [['Type','Date','Item/Name','Category','Qty','Rate','Amount','Payment','Note']];
-  DB.sales.forEach(function(x){ rows.push(['Sale', x.date, 'Daily Sale', 'Sale', '', '', x.amount, 'Cash ' + (+x.cash||0) + ' / Online ' + (+x.online||0), (x.note||'').replace(/,/g,' ')]); });
-  DB.costs.forEach(function(c){ rows.push(['Kharcha/Purchase', c.date, costLabel(c), KINDLBL[c.kind], c.qty||'', c.rate||'', c.amount, c.pay||'cash', (c.note||'').replace(/,/g,' ')]); });
-  (DB.savings||[]).forEach(function(x){ rows.push(['Savings', x.date, x.type==='out' ? 'Withdrawal' : 'Deposit', 'Savings', '', '', x.amount, x.mode, (x.note||'').replace(/,/g,' ')]); });
-  var csv = rows.map(function(r){ return r.join(','); }).join('\n');
-  var a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv); a.download = 'bean-buzz-data.csv'; a.click();
-  toast('Excel (CSV) file download ho gayi ✅');
-}
-function hashPin(p){ var h=0; for(var i=0;i<p.length;i++){ h = ((h<<5)-h + p.charCodeAt(i))|0; } return 'h' + h; }
-function setPin(){ var p = document.getElementById('pinNew').value.trim(); if(p.length < 4){ toast('PIN kam se kam 4 digit ka ho'); return; } DB.settings = DB.settings || {}; DB.settings.pinHash = hashPin(p); save(); document.getElementById('pinNew').value=''; render(); toast('PIN lag gaya 🔒'); }
-function removePin(){ if(!DB.settings || !DB.settings.pinHash){ toast('PIN laga hi nahi hai'); return; } if(!confirm('PIN hata dein?')) return; delete DB.settings.pinHash; save(); render(); toast('PIN hat gaya'); }
-function tryPin(){ var p = document.getElementById('pinTry').value; if(DB.settings && DB.settings.pinHash === hashPin(p)){ document.getElementById('pinModal').classList.remove('open'); document.getElementById('pinTry').value=''; } else { toast('Galat PIN ❌'); } }
-function checkPin(){ if(DB.settings && DB.settings.pinHash){ document.getElementById('pinModal').classList.add('open'); } }
-
-/* ---------- SHEET SYNC ---------- */
-function syncUrl(){
-  var v = (document.getElementById('syncUrl').value || '').trim();
-  if(v && v !== '__SYNC_URL__'){ DB.settings = DB.settings || {}; DB.settings.syncUrl = v; save(); return v; }
-  if(DB.settings && DB.settings.syncUrl) return DB.settings.syncUrl;
-  return (SYNC_URL_DEFAULT !== '__SYNC_URL__') ? SYNC_URL_DEFAULT : '';
-}
-function buildPayload(){
-  var sales = DB.sales.slice().sort(function(a,b){ return a.date<b.date?-1:1; })
-    .map(function(s){ return { date:s.date, amount:+s.amount, cash:(+s.cash||0), online:(+s.online||0), note:s.note||'' }; });
-  var costs = DB.costs.slice().sort(function(a,b){ return a.date<b.date?-1:1; })
-    .map(function(c){
-      var it = c.itemId ? itemById(c.itemId) : null;
-      var label = it ? it.name : (c.kind === 'op' ? (c.cat || c.name || '') : (c.name || ''));  // sheet ke Stock SUMIFS ke liye plain item naam
-      return { date:c.date, kind:c.kind, kindLabel:KINDLBL[c.kind], label:label, qty:(c.qty === undefined ? '' : c.qty), amount:+c.amount, note:c.note||'', pay:(c.pay||'cash'), rate:(c.rate||'') };
-    });
-  var items = DB.items.map(function(it){ return { id:it.id, name:it.name, unit:it.unit, rate:it.rate, open:it.open, cat:it.cat||'Grocery' }; });
-  var closings = {};
-  var cl = DB.closings[curMonth] || {};
-  DB.items.forEach(function(it){ if(cl[it.id] !== undefined && cl[it.id] !== '') closings[it.id] = cl[it.id]; });
-  return { sales:sales, costs:costs, items:items, closings:closings, settlements:DB.settlements || [], savings:DB.savings || [], wallet:DB.wallet || { openingCash:0, openingOnline:0 }, adjustments:DB.adjustments || [], openings:DB.openings || {}, priceLog:DB.priceLog || [], meta:{ updatedAt:(DB.meta && DB.meta.updatedAt) || 0 } };
-}
-function syncNow(){
-  var url = syncUrl();
-  var st = document.getElementById('syncStatus');
-  if(!url){ st.textContent = '⚠️ Sync link set nahi hai — pehle link daalo ya Ayan se pucho.'; return; }
-  st.textContent = '⏳ Sheet update ho raha hai…';
-  fetch(url, { method:'POST', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(buildPayload()) })
-    .then(function(r){ return r.text(); })
-    .then(function(t){
-      var ok = t.indexOf('"ok":true') >= 0 || t.indexOf('"ok": true') >= 0;
-      st.textContent = ok ? '✅ Sheet update ho gaya — ' + new Date().toLocaleTimeString() : '⚠️ Jawab ajeeb aaya: ' + t.slice(0,80);
-      if(ok) toast('Google Sheet update ✅');
-    })
-    .catch(function(e){ st.textContent = '❌ Sync fail — internet check karo, phir try karo.'; });
-}
-function openSheet(){ window.open(SHEET_URL, '_blank'); }
-
-/* ---------- AUTO UPDATE (sheet se data + naya design) ---------- */
-function applyPull(res){
-  var lowByName = {};
-  DB.items.forEach(function(it){ lowByName[it.name] = it.low || 0; });
-  var keepUrl = (DB.settings && DB.settings.syncUrl) || '';
-  var keepPin = (DB.settings && DB.settings.pinHash) || '';
-  var keepSavings = DB.savings || [], keepAdj = DB.adjustments || [], keepWallet = DB.wallet || null, keepOpenings = DB.openings || {}, keepPrice = DB.priceLog || [];
-  var splitByKey = {}; DB.sales.forEach(function(x){ splitByKey[x.date + '|' + (+x.amount)] = x; });
-  var serverHas = function(k){ return res.db && res.db[k] !== undefined; };
-  DB = res.db;
-  DB.meta = { updatedAt: (res.meta && res.meta.updatedAt) || 0 };
-  DB.settings = { syncUrl: keepUrl, partner: !!(res.config && res.config.partner) };
-  if (keepPin) DB.settings.pinHash = keepPin;
-  DB.sales.forEach(function(x){ if (x.cash === undefined) { var old = splitByKey[x.date + '|' + (+x.amount)]; if (old && old.cash !== undefined) { x.cash = old.cash; x.online = old.online; } } });
-  if (!serverHas('savings')) DB.savings = keepSavings;
-  if (!serverHas('adjustments')) DB.adjustments = keepAdj;
-  if (!serverHas('wallet') && keepWallet) DB.wallet = keepWallet;
-  if (!serverHas('openings')) DB.openings = keepOpenings;
-  if (!serverHas('priceLog') || !(res.db.priceLog || []).length) DB.priceLog = keepPrice;
-  DB.items.forEach(function(it){ if (lowByName[it.name]) it.low = lowByName[it.name]; });
-  if (!DB.closings) DB.closings = {};
-  if (!DB.settlements) DB.settlements = [];
-  migrateDB();
-  try{ Store.set(JSON.stringify(DB)); }catch(e){}
-  closeOverlays(); fillItemSelect(); render();
-}
-function cloudPull(manual){
-  var url = syncUrl();
-  var st = document.getElementById('syncStatus');
-  if(!url){ if(manual) toast('Sync link set nahi hai'); return; }
-  fetch(url + (url.indexOf('?') >= 0 ? '&' : '?') + 'data=1')
-    .then(function(r){ return r.json(); })
-    .then(function(res){
-      if(!res || !res.ok || !res.db) throw 0;
-      var cloudUpd = (res.meta && res.meta.updatedAt) || 0;
-      var localUpd = (DB.meta && DB.meta.updatedAt) || 0;
-      var partnerChanged = (!!(res.config && res.config.partner)) !== PARTNER();
-      if (cloudUpd > localUpd || partnerChanged) {
-        applyPull(res);
-        toast('✅ Naya data aa gaya — app update ho gaya');
-        if(st) st.textContent = 'Sheet se latest data aa gaya — ' + new Date().toLocaleTimeString();
-      } else if (manual) {
-        toast('Sheet ka data hi latest hai 👍');
-        if(st) st.textContent = 'Data already latest hai — koi change nahi.';
-      }
-    })
-    .catch(function(e){ if(manual) toast('Net nahi mila — baad me try karo'); });
-}
-function checkRemoteVersion(){
-  fetch(REMOTE_BASE + 'v.txt?ts=' + Date.now())
-    .then(function(r){ return r.text(); })
-    .then(function(t){
-      var rv = parseInt(t, 10);
-      if (rv && rv > APP_VERSION) location.replace(REMOTE_BASE + 'index.html?v=' + rv);
-    })
-    .catch(function(e){});
-}
-
-/* ---------- REPORT / BACKUP ---------- */
-function shareReport(){
-  var p = plCalc(curMonth);
-  var lines = [
-    '☕ *BEAN BUZZ — ' + monthLabel(curMonth) + ' Hisab*',
-    'Total Sale: ' + inr(p.sales),
-    'COGS (maal ki cost): ' + inr(p.cogs),
-    'Gross Profit: ' + inr(p.gross),
-    'Operating Kharcha: ' + inr(p.op),
-    (PARTNER() ? '*Net Profit: ' + inr(p.net) + '*\nAbhinash (50%): ' + inr(Math.max(p.net,0)/2) + '\nPartner (50%): ' + inr(Math.max(p.net,0)/2) : '*Net Profit (pura Abhinash ka): ' + inr(p.net) + '*'),
-    p.isTrue ? '(Closing stock ke saath pakka hisab)' : '(Note: closing stock baki hai)'
-  ];
-  window.open('https://wa.me/?text=' + encodeURIComponent(lines.join('\n')), '_blank');
-}
-function exportData(){
-  var txt = JSON.stringify(DB);
-  var box = document.getElementById('importBox');
-  box.value = txt; box.select();
-  if(navigator.clipboard) navigator.clipboard.writeText(txt);
-  toast('Backup copy ho gaya 📋');
-}
-function importData(){
-  try{
-    var d = JSON.parse(document.getElementById('importBox').value);
-    if(!d.items || !d.sales || !d.costs) throw 0;
-    DB = d; migrateDB(); save(); fillItemSelect(); render(); toast('Backup restore ho gaya ✅');
-  }catch(e){ toast('Backup sahi nahi hai ❌'); }
-}
-
-/* ---------- INIT ---------- */
-load();
-if(!DB.settings) DB.settings = {};
-var todayStr = dstrOf(new Date());
-document.getElementById('saleDate').value = todayStr;
-document.getElementById('costDate').value = todayStr;
-document.getElementById('savDate').value = todayStr;
-document.getElementById('costCat').addEventListener('change', function(){
-  if(costKind==='op') document.getElementById('costName').value = this.value;
-});
-var dn = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-var mn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-var now = new Date();
-document.getElementById('todayBox').innerHTML = '<b>' + dn[now.getDay()] + '</b><br>' + now.getDate() + ' ' + mn[now.getMonth()] + ' ' + now.getFullYear();
-fillItemSelect();
-setKind('stock');
-render();
-saleTotal();
-checkPin();
-cloudPull(false);
-checkRemoteVersion();
-</script>
-
-</body>
-</html>
+function vHome(){
+ const today=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'});
+ const ts=datedSales().filter(s=>s.date===today);
+ const tCash=ts.reduce((t,s)=>t+(+s.cash||0),0),tOn=ts.reduce((t,s)=>t+(+s.online||0),0),tTot=ts.reduce((t,s)=>t+(s.amount!=null?+s.amount:(+s.cash||0)+(+s.online||0)),0);
+ const ok=openingKnown();const rap=sum(entries().filter(e=>e.type==='expense'));
+ const pu=sum(entries().filter(e=>e.type!=='expense'));
+ const pl=profitState();
+ return '<div class="grid"><div class="stat hero" style="grid-column:1/-1"><div class="k">Shop Ka Paisa — Current Snapshot</div><div class="v">'+inr(db.money.cash+db.money.online)+'</div><div class="n">Cash '+inr(db.money.cash)+' · Online '+inr(db.money.online)+'<br>Ye CURRENT paisa hai — 1 Nov ka opening balance ya profit NAHI hai. Snapshot ka cut-off time <b>Pending</b> hai.</div></div>'+
+ '<div class="stat"><div class="k">Aaj ki Sale</div><div class="v">'+inr(tTot)+'</div><div class="n">Cash '+inr(tCash)+' · Online '+inr(tOn)+'</div></div>'+
+ '<div class="stat"><div class="k">Sale Records (Nov)</div><div class="v">'+inr(salesTotal())+'</div><div class="n">'+db.sales.filter(s=>!s.date).length+' entries ki date Pending hai — ye poore mahine ki sale nahi hai</div></div>'+
+ '<div class="stat"><div class="k">Purchases + Kharcha (1–7 Nov)</div><div class="v">'+inr(sum(entries()))+'</div><div class="n">Stock/unresolved '+inr(pu)+' · Rapido/transport '+inr(rap)+'<br>Provisional — classification pending</div></div>'+
+ '<div class="stat"><div class="k">Savings</div><div class="v">'+(db.savingsSupplied==null?'<span class="pill p-pend">Pending</span>':inr(db.savingsSupplied))+'</div><div class="n">Supplied amount nahi mila — zero nahi maana</div></div>'+
+ '<div class="stat"><div class="k">Opening Stock Value</div><div class="v">'+inr(ok.v)+'</div><div class="n">Known subtotal · '+ok.p+' items ka value Pending<br><span class="pill p-prov">Provisional — reference rates par</span></div></div>'+
+ '<div class="stat"><div class="k">Monthly Profit (Nov)</div><div class="v"><span class="pill p-pend">Pending</span></div><div class="n">'+pl+'</div></div>'+
+ '<div class="stat"><div class="k">Owner Labour Allowance</div><div class="v">'+inr(db.settings.salary)+' / mahina</div><div class="n">Owner + wife MILAKAR (dono ka alag nahi) · Nov me '+inr(db.settings.salary/30)+'/din allocation</div></div></div>'+
+ '<div class="card"><h3>Kaam ka flow</h3><div class="small">1. Opening Stock &nbsp;→&nbsp; 2. Purchases &nbsp;→&nbsp; 3. Food Sales &nbsp;→&nbsp; 4. Month-end Closing Stock<br>Closing count aane ke baad hi Stock Used Cost aur final Profit pakka hoga. Jo data missing hai woh <b>Pending</b> dikhega — guess ya zero nahi bhara jayega.</div></div>'+
+ '<div class="card"><h3>Pending dhyaan do ('+db.pending.length+')</h3><div class="small">'+db.pending.slice(0,3).map(p=>'• '+esc(p.title)).join('<br>')+'<br><br><button class="btn sm" onclick="go(\'pending\')">Saare Pending dekho</button></div></div>'}
+function profitState(){const closed=db.closing&&Object.keys(db.closing).length>0;if(!closed)return 'Closing Stock count abhi nahi hua — final profit Pending hai.';return 'Closing count partial hai — Reports me dekho.'}
+function vOpening(){
+ const ok=openingKnown();
+ let rows=db.items.map(it=>{const o=db.opening.find(x=>x.itemRef===it.ref);const pu=perUnit(it);
+  if(!o)return '<tr><td>'+esc(it.name)+'<div class="tiny">'+esc(it.packText)+'</div></td><td class="r"><span class="pill p-pend">Not Entered</span></td><td class="r">—</td></tr>';
+  return '<tr><td>'+esc(it.name)+'<div class="tiny">Diya gaya: '+esc(o.text)+'</div></td><td class="r">'+(o.value!=null?inr(o.value):'<span class="pill p-pend">Pending</span>')+'<div class="tiny">'+(o.status)+'</div></td><td class="r"><button class="btn sm ghost" onclick="editOpening('+it.ref+')">Edit</button></td></tr>'}).join('');
+ return '<div class="card"><h3>Opening Stock — November 2026</h3><div class="small">Ye mahine ki SHURUAAT ka stock hai — ye purchase ya kharcha NAHI hai. Value reference rates par <b>Provisional</b> hai jab tak owner accept na kare.<br><br>Known subtotal: <b>'+inr(ok.v)+'</b> · <b>'+ok.p+'</b> items ka value Pending (neeche list me dikh raha hai).</div></div><div class="card"><table><tr><th>Item</th><th class="r">Value</th><th></th></tr>'+rows+'</table></div>'}
+function editOpening(ref){const o=db.opening.find(x=>x.itemRef===ref);if(!o){alert('Is item ki opening entry abhi nahi hai — pehle Pending Details dekho.');return}const v=prompt(itemByRef(ref).name+' — Opening value (₹). Khali chhodo = Pending rakho:',o.value==null?'':o.value);if(v===null)return;o.value=v===''?null:+v;const q=prompt('Quantity (base unit me, jaise pc/g/ml). Khali = Pending:',o.qtyBase==null?'':o.qtyBase);if(q!==null)o.qtyBase=q===''?null:+q;o.status='Owner Edited';save();render()}
+function vEntries(mode){
+ const list=mode==='expenses'?entries().filter(e=>e.type==='expense'):entries();
+ const byDate={};list.forEach(e=>{(byDate[e.date]=byDate[e.date]||[]).push(e)});
+ let h='<div class="card"><h3>'+(mode==='expenses'?'Expenses (Business Kharcha)':'Purchases — 1–7 Nov 2026')+'</h3><div class="small">'+(mode==='expenses'?'Rapido/transport jaisa kharcha yahan dikhta hai. Stock purchase ko expense mat samjho — woh alag hai.':'Ye 43 supplied lines hain (P001–P043). Payment mode sabka <b>Pending</b> hai — Cash/Online guess nahi kiya, isliye kisi account se paisa nahi kata.')+'<br><br>Kul: <b>'+inr(sum(list))+'</b>'+(mode==='purchases'?' · Rapido kul: <b>'+inr(sum(entries().filter(e=>e.type==="expense")))+'</b> · Ye kul COGS nahi hai.':'')+'</div></div>';
+ Object.keys(byDate).sort().forEach(d=>{h+='<div class="card"><h3>'+dstr(d)+'</h3>'+byDate[d].map(e=>'<div class="row"><div><b>'+esc(e.raw)+'</b> <span class="tiny">'+e.id+'</span><div class="small">'+esc(e.qtyNote||'')+'</div><div>'+(e.type==='expense'?'<span class="pill p-exp">Transport Expense</span>':'<span class="pill p-pend">Stock / Pending classification</span>')+' <span class="pill p-pend">Payment Pending</span></div></div><div class="r"><b>'+inr(e.amount)+'</b><br><button class="btn sm ghost" onclick="editEntry(\''+e.id+'\')">Edit</button></div></div>').join('')+'<div class="row"><div><b>Din ka kul</b></div><div class="r"><b>'+inr(sum(byDate[d]))+'</b></div></div></div>'});
+ h+='<div class="card"><h3>Nayi Entry Daalo</h3><label>Tarik (Date)</label><input type="date" id="neDate" value="2026-11-"><label>Item / Kaam ka naam</label><input id="neName" placeholder="jaise: Milk Powder"><label>Amount (₹)</label><input type="number" id="neAmt" inputmode="decimal"><label>Type</label><select id="neType"><option value="pending">Stock Purchase (Pending classification)</option><option value="expense">Business Expense</option></select><label>Quantity / Note (optional)</label><input id="neNote" placeholder="jaise: 1 kg, 300 pc"><button class="btn" onclick="addEntry()">+ Entry Save Karo</button></div>';
+ return h}
+function addEntry(){const d=$('#neDate').value,n=$('#neName').value.trim(),a=+$('#neAmt').value;if(!d||!n||!a){alert('Date, naam aur amount teeno chahiye.');return}db.entries.push({id:'E'+Date.now(),date:d,raw:n,amount:a,type:$('#neType').value,qtyNote:$('#neNote').value,payment:'pending'});save();render()}
+function editEntry(id){const e=entries().find(x=>x.id===id);const a=prompt(e.raw+' — Amount (₹):',e.amount);if(a===null)return;e.amount=+a;const t=prompt('Type: "expense" likho agar business kharcha hai, warna "stock":',e.type==='expense'?'expense':'stock');if(t!==null)e.type=(t.trim()==='expense')?'expense':'pending';save();render()}
+function vSales(){
+ let rows=db.sales.map(s=>'<div class="row"><div><b>'+s.id+'</b> — '+(s.date?dstr(s.date):'<span class="pill p-pend">Date Pending</span>')+'<div class="small">'+(s.date?('Cash '+inr(s.cash||0)+' · Online '+inr(s.online||0)):'Cash/Online split bhi Pending — saara Cash guess nahi kiya')+'</div></div><div class="r"><b>'+inr(s.amount!=null?s.amount:(+s.cash||0)+(+s.online||0))+'</b><br><button class="btn sm ghost" onclick="editSale(\''+s.id+'\')">Edit</button></div></div>').join('');
+ return '<div class="card"><h3>Food Sales — November 2026</h3><div class="small">4 sale amounts source se mile hain, kul <b>'+inr(salesTotal())+'</b> — lekin dates overwritten hain, isliye date Pending rakhi hai. Ye <b>poore mahine ki sale nahi</b> hai. Band din confirm hone par hi ₹0 hoga; khali din = Pending, band nahi.</div></div><div class="card">'+rows+'</div><div class="card"><h3>Nayi Sale Daalo</h3><label>Tarik</label><input type="date" id="nsDate"><label>Cash Sale (₹)</label><input type="number" id="nsCash" inputmode="decimal"><label>Online Sale (₹)</label><input type="number" id="nsOnline" inputmode="decimal"><label>Ya sirf Total (split pata nahi)</label><input type="number" id="nsTotal" inputmode="decimal"><button class="btn" onclick="addSale()">+ Sale Save Karo</button></div>'}
+function addSale(){const d=$('#nsDate').value;if(!d){alert('Date chahiye.');return}const c=$('#nsCash').value,o=$('#nsOnline').value,t=$('#nsTotal').value;const s={id:'S'+Date.now(),date:d};if(t&&!c&&!o){s.amount=+t;s.cash=null;s.online=null}else{s.cash=+c||0;s.online=+o||0;s.amount=null}db.sales.push(s);save();render()}
+function editSale(id){const s=db.sales.find(x=>x.id===id);const d=prompt('Date (YYYY-MM-DD). Khali = Pending:',s.date||'');if(d===null)return;s.date=d===''?null:d;save();render()}
+function vClosing(){
+ const rows=db.items.map(it=>{const o=db.opening.find(x=>x.itemRef===it.ref);if(!o)return'';const c=db.closing[it.ref];const calc=closingCalc(it,o,c);
+ return '<div class="row"><div><b>'+esc(it.name)+'</b><div class="small">Opening: '+esc(o.text)+(o.value!=null?' · '+inr(o.value):' · value Pending')+'</div><div class="small">'+calc+'</div></div><div class="r"><input style="width:96px" type="number" inputmode="decimal" placeholder="Count" value="'+(c==null?'':c)+'" onchange="setClosing('+it.ref+',this.value)"><div class="tiny">'+esc(it.unit)+' me ginna</div></div></div>'}).join('');
+ return '<div class="card"><h3>Month-End Closing Stock — November 2026</h3><div class="small">Mahine ke AAKHIR me dukaan me jo stock physically gina jayega, woh yahan bharo. Uske baad:<br><b>Stock Used Cost = Opening Value + Stock Purchases − Closing Value</b> (weighted-average rate par).<br>Abhi count nahi hua hai, isliye final Stock Used Cost aur Profit <b>Pending</b> hai. Guess quantity nahi bhari gayi.</div></div><div class="card">'+rows+'</div><div class="card"><div class="small">Jo item gina hi nahi, use khali chhodo — woh Pending rahega, zero nahi banega. Count galat lage to wapas badal sakte ho; purana record backup/export me rehta hai.</div></div>'}
+function setClosing(ref,v){if(!db.closing)db.closing={};if(v==='')delete db.closing[ref];else db.closing[ref]=+v;save();render()}
+function closingCalc(it,o,c){if(c==null)return '<span class="pill p-pend">Count Pending</span>';if(o.value==null||o.qtyBase==null)return '<span class="pill p-pend">Value Pending — opening rate/qty confirm karo</span>';const linked=db.entries.filter(e=>e.itemRef===it.ref&&e.qtyBase!=null);const aq=o.qtyBase+linked.reduce((t,e)=>t+e.qtyBase,0);const av=o.value+linked.reduce((t,e)=>t+e.amount,0);if(c>aq)return '<span class="pill p-exp">Count available se zyada hai — pehle missing purchase/opening theek karo</span>';const wavg=av/aq;const cv=c*wavg;const used=av-cv;return 'Weighted avg '+inr(Math.round(wavg*100)/100)+'/'+it.unit+' · Closing value <b>'+inr(Math.round(cv*100)/100)+'</b> · Used cost <b>'+inr(Math.round(used*100)/100)+'</b>'+(linked.length?'':' <span class="tiny">(sirf opening par hisab — is item ki purchases abhi map nahi hui)</span>')}
+function vMoney(){
+ const tr=db.transfers||[];
+ return '<div class="card"><h3>Shop Ka Paisa — Current Snapshot</h3><div class="row"><div>Cash</div><div class="r"><b>'+inr(db.money.cash)+'</b></div></div><div class="row"><div>Online</div><div class="r"><b>'+inr(db.money.online)+'</b></div></div><div class="row"><div><b>Available Shop Money</b></div><div class="r"><b>'+inr(db.money.cash+db.money.online)+'</b></div></div><div class="small">Ye owner ka diya CURRENT snapshot hai. Ye 1 Nov ka opening balance, sale ya profit NAHI hai. Purani purchases isme se dobara nahi katengi. Ledger se reconcile abhi <b>Pending</b> hai kyunki snapshot ka exact cut-off aur 1 Nov ka opening paisa confirm nahi hai.</div></div><div class="card"><h3>Savings</h3><div class="small">Supplied savings amount: '+(db.savingsSupplied==null?'<span class="pill p-pend">Pending</span>':'<b>'+inr(db.savingsSupplied)+'</b>')+'<br>Savings transfer profit ya kharcha NAHI hota — sirf paisa ek jagah se dusri jagah jata hai, kul paisa wahi rehta hai.</div>'+tr.map(t=>'<div class="row"><div>'+esc(t.note)+'<div class="small">'+dstr(t.date)+'</div></div><div class="r"><b>'+inr(t.amount)+'</b></div></div>').join('')+'<label>Amount (₹)</label><input type="number" id="trAmt" inputmode="decimal"><label>Note</label><input id="trNote" placeholder="Cash se Savings / Savings se Cash"><button class="btn" onclick="addTransfer()">Transfer Note Karo</button></div><div class="card"><h3>Receivable / Payable</h3><div class="small">Owner ke hisab se abhi lena-dena baaki: <b>₹0 / ₹0</b> (koi udhaar outstanding nahi bataya gaya). Purchases ka paid status Pending hai — use payable nahi maana gaya jab tak confirm na ho.</div></div>'}
+function addTransfer(){const a=+$('#trAmt').value;if(!a){alert('Amount chahiye');return}(db.transfers=db.transfers||[]).push({date:new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Kolkata'}),amount:a,note:$('#trNote').value||'Transfer'});save();render()}
+function vReports(){
+ const ok=openingKnown();const rev=salesTotal();const exp=sum(entries().filter(e=>e.type==='expense'));const pu=sum(entries().filter(e=>e.type!=='expense'));
+ return '<div class="card"><h3>Profit / Loss — November 2026</h3><div class="row"><div>Food Sales (available records)</div><div class="r"><b>'+inr(rev)+'</b></div></div><div class="row"><div>Opening Stock Value (known)</div><div class="r">'+inr(ok.v)+' <span class="tiny">('+ok.p+' pending)</span></div></div><div class="row"><div>Purchases (provisional kul)</div><div class="r">'+inr(pu)+'</div></div><div class="row"><div>Closing Stock Value</div><div class="r"><span class="pill p-pend">Pending — count nahi hua</span></div></div><div class="row"><div>Stock Used Cost</div><div class="r"><span class="pill p-pend">Pending</span></div></div><div class="row"><div>Transport / Rapido Expense</div><div class="r">'+inr(exp)+'</div></div><div class="row"><div>Owner Labour Allowance (Nov)</div><div class="r">'+inr(db.settings.salary)+' <span class="tiny">(allocation, cash paid nahi)</span></div></div><div class="row"><div><b>Final Profit (labour se pehle / baad)</b></div><div class="r"><span class="pill p-pend">Pending</span></div></div><div class="small">Final profit tabhi bane ga jab: (1) sales ki dates confirm hon, (2) purchases stock/expense me classify hon, (3) month-end closing count aaye. Purchases ko profit me dobara nahi kata jayega — sirf Stock Used Cost katega.</div></div><div class="card"><h3>Gas — sirf estimate</h3><div class="small">₹3,100/cylinder × lagbhag 2 = ₹6,200 mahine ka <b>estimate</b> hai. Ye November ka confirmed kharcha NAHI banaya gaya. Asli refill date/payment milega tab entry hogi.</div></div><div class="card"><h3>Din ke hisab se Purchases</h3>'+[...new Set(entries().map(e=>e.date))].sort().map(d=>'<div class="row"><div>'+dstr(d)+'</div><div class="r"><b>'+inr(sum(entries().filter(e=>e.date===d)))+'</b></div></div>').join('')+'</div>'}
+function vRates(){
+ return '<div class="card"><h3>Item Rates — Search</h3><input class="search" id="rateSearch" placeholder="Item dhundho: Milk, Momo, Mayo..."><div class="small">Ye <b>reference rates</b> hain (owner ke diye hue) — purani purchases in se overwrite nahi hoti. Per-unit rate tabhi dikhta hai jab pack size pakka ho, warna Pending.</div></div><div class="card" id="rateList">'+rateRows('')+'</div>'}
+function rateRows(q){return db.items.filter(it=>it.name.toLowerCase().includes(q.toLowerCase())).map(it=>{const pu=perUnit(it);const buys=db.entries.filter(e=>e.raw.toLowerCase().includes(it.name.split(' ')[0].toLowerCase())&&e.amount);return '<div class="row"><div><b>'+esc(it.name)+'</b><div class="small">'+esc(it.packText)+(it.note?' · '+esc(it.note):'')+'</div></div><div class="r">'+(it.refPrice!=null?'<b>'+inr(it.refPrice)+'</b>':'<span class="pill p-pend">Rate Pending</span>')+'<div class="small">'+(pu!=null?inr(Math.round(pu*10000)/10000)+' / '+it.unit:'per-unit Pending')+'</div></div></div>'}).join('')||'<div class="small">Kuch nahi mila.</div>'}
+function bindSearch(){const i=$('#rateSearch');if(i)i.oninput=()=>{$('#rateList').innerHTML=rateRows(i.value)}}
+function vMenu(){return '<div class="card"><h3>Menu — Selling Prices</h3><div class="small">Ye <b>bechne ke daam</b> hain, kharid ke nahi. Packing charge ₹5 extra (per order hai ya per box — confirm pending). Daam badalne se purani sale nahi badlegi.</div></div><div class="card"><table><tr><th>Item</th><th class="r">Price</th></tr>'+db.menu.map(m=>'<tr><td>'+esc(m[1])+'<div class="tiny">'+esc(m[0])+(m[3]?' · '+esc(m[3]):'')+'</div></td><td class="r"><b>'+inr(m[2])+'</b></td></tr>').join('')+'</table><div class="small">Kul 26 variants.</div></div>'}
+function vPending(){return '<div class="card"><h3>Pending Details — jo confirm karna baaki hai</h3><div class="small">Ye cheezein guess karke nahi bhari gayi. Owner jab confirm karega, wahi item Edit karke theek ho jayegi — baaki kaam rukega nahi.</div></div>'+db.pending.map(p=>'<div class="card"><h3 style="font-size:14.5px">'+esc(p[0])+'</h3><div class="small">'+esc(p[1])+'</div></div>').join('')}
+function vSettings(){
+ return '<div class="card"><h3>Settings</h3><label>Owner Labour Allowance — dono milakar (₹/mahina)</label><input type="number" id="setSal" value="'+db.settings.salary+'"><button class="btn" onclick="db.settings.salary=+document.querySelector(\'#setSal\').value||30000;save();alert(\'Save ho gaya\')">Save</button></div><div class="card"><h3>Backup / Export</h3><div class="small">Purane app ka pura data pehle se backup me safe hai (backup-20261112). Yahan se is app ka backup bhi le sakte ho.</div><br><button class="btn gold" onclick="exportJSON()">Backup (JSON) Download</button> <button class="btn ghost" onclick="exportCSV()">Purchases CSV</button><br><br><label>Restore (JSON file)</label><input type="file" id="restoreFile" accept=".json"><button class="btn ghost" onclick="restore()">Restore Karo</button></div><div class="card"><h3>PIN</h3><div class="small">PIN lagane ke liye Settings me 4-digit PIN daalo. Abhi '+(db.settings.pin?'PIN ON hai':'PIN OFF hai')+'.</div><label>Naya PIN (khali = PIN hatana)</label><input type="password" id="setPin" inputmode="numeric" maxlength="6"><button class="btn" onclick="setPinFn()">PIN Save</button></div>'}
+function setPinFn(){const v=$('#setPin').value;db.settings.pin=v?btoa(v):null;save();alert('Ho gaya — app dobara kholne par PIN lagega.');render()}
+function tryPin(){if(btoa($('#pinIn').value)===db.settings.pin){$('#lock').style.display='none'}else{$('#pinErr').textContent='Galat PIN'}}
+function exportJSON(){const b=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bean-buzz-backup.json';a.click()}
+function exportCSV(){let csv='ID,Date,Item,Amount,Type,Note\n'+entries().map(e=>[e.id,e.date,'"'+e.raw.replace(/"/g,'""')+'"',e.amount,e.type,'"'+(e.qtyNote||'').replace(/"/g,'""')+'"'].join(',')).join('\n');const b=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bean-buzz-purchases.csv';a.click()}
+function restore(){const f=$('#restoreFile').files[0];if(!f){alert('File chuno');return}const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.seedVer!==SEED.seedVer)throw 0;db=d;save();render();alert('Restore ho gaya')}catch(e){alert('Ye file is app ki backup nahi lagti')}};r.readAsText(f)}
+load();renderNav();render();
+if(db.settings.pin){$('#lock').style.display='block'}
+</script></body></html>
